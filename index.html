@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>FORGE · 锻记</title>
+  <title>IRONLOG · 艾若乐格</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+SC:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -87,6 +87,13 @@
     .date-label{font-size:13px;color:var(--text-2);flex-shrink:0}
     .date-input{flex:1;height:40px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 12px;font-family:'Space Mono',monospace;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;color-scheme:dark}
     .date-input:focus{border-color:var(--accent)}
+    .record-mode-tabs{display:flex;gap:8px;margin-bottom:20px}
+    .record-mode-tab{padding:10px 20px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);font-size:14px;color:var(--text-2);cursor:pointer;transition:all .2s;font-family:inherit;flex:1}
+    .record-mode-tab:hover{border-color:var(--text-2);color:var(--text)}.record-mode-tab.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent-glow)}
+    .cardio-type-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+    .cardio-type-chip{padding:10px 16px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-2);cursor:pointer;transition:all .2s;font-family:inherit}
+    .cardio-type-chip:hover{border-color:var(--info);color:var(--info)}.cardio-type-chip.selected{border-color:var(--info);background:var(--info-dim);color:var(--info)}
+    .cardio-field-label{width:60px;font-size:13px;color:var(--text-2);flex-shrink:0}
     .history-filters{display:flex;gap:8px;overflow-x:auto;margin-bottom:20px;padding-bottom:4px;-ms-overflow-style:none;scrollbar-width:none}
     .history-filters::-webkit-scrollbar{display:none}
     .filter-chip{padding:8px 16px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:13px;color:var(--text-2);cursor:pointer;transition:all .2s;white-space:nowrap;font-family:inherit;flex-shrink:0;display:flex;align-items:center;gap:6px}
@@ -200,14 +207,53 @@
     .guide-tips.dont li::before{content:'✗';color:var(--danger)}
     .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--surface-2);border:1px solid var(--success);color:var(--success);padding:12px 24px;border-radius:var(--radius);font-size:14px;font-weight:500;z-index:200;transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 30px rgba(0,0,0,.4)}
     .toast.show{transform:translateX(-50%) translateY(0)}
+    /* Login */
+    #login-screen{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+    #login-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 600px 400px at 50% 20%,rgba(212,154,30,.08) 0%,transparent 70%);pointer-events:none}
+    .login-box{width:100%;max-width:320px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;position:relative;z-index:1;animation:slideUp .4s ease}
+    .login-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;color:var(--accent);text-align:center;margin-bottom:8px}
+    .login-logo span{font-family:'Noto Sans SC';font-size:14px;color:var(--text-2);margin-left:6px}
+    .login-sub{text-align:center;font-size:12px;color:var(--text-3);margin-bottom:24px}
+    .login-form .text-input{margin-bottom:12px}
+    .login-form .save-btn{margin-top:16px}
+    .login-err{font-size:12px;color:var(--danger);margin-top:8px;min-height:18px}
+    /* Settings / Account */
+    .settings-section{margin-bottom:24px}
+    .settings-section-title{font-size:13px;color:var(--text-2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .user-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .user-card-info{flex:1;min-width:0}
+    .user-card-name{font-size:14px;font-weight:500}
+    .user-card-role{font-size:11px;color:var(--text-3);margin-top:2px}
+    .user-card-actions{display:flex;gap:8px;align-items:center}
+    .user-toggle{width:44px;height:24px;border-radius:12px;background:var(--surface-3);position:relative;cursor:pointer;transition:background .2s}
+    .user-toggle.on{background:var(--success)}
+    .user-toggle::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+    .user-toggle.on::after{transform:translateX(20px)}
+    .add-user-form{background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius);padding:16px;margin-bottom:20px}
+    .add-user-form .input-row{margin-bottom:10px}
+    .pwd-warn{font-size:12px;margin-top:16px;padding:12px;background:rgba(245,158,11,.2);color:var(--warning);border:1px solid var(--warning);border-radius:var(--radius-sm)}
     @media(min-width:481px){#app{border-left:1px solid var(--border);border-right:1px solid var(--border)}}
   </style>
 </head>
 <body>
-<div id="app">
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">IRONLOG<span>艾若乐格</span></div>
+    <div class="login-sub">登录后使用全部功能</div>
+    <form class="login-form" onsubmit="return doLogin(event)">
+      <input type="text" class="text-input" id="loginUser" placeholder="账号" required autocomplete="username">
+      <input type="password" class="text-input" id="loginPwd" placeholder="密码" required autocomplete="current-password">
+      <button type="submit" class="save-btn">登 录</button>
+      <div class="login-err" id="loginErr"></div>
+    </form>
+  </div>
+</div>
+<div id="app" style="display:none">
   <header class="app-header">
-    <div class="app-logo">FORGE<span>锻记</span></div>
+    <div class="app-logo" id="headerLogo" onclick="maybeBack()" style="cursor:pointer">IRONLOG<span>艾若乐格</span></div>
     <div class="header-actions">
+      <button class="header-btn" id="btnSettings" onclick="switchView('settings')" title="账号管理" style="display:none">⚙️</button>
+      <button class="header-btn" onclick="switchView('account')" title="修改账号">👤</button>
       <button class="header-btn" onclick="exportTemplate()" title="下载Excel模板" style="font-size:13px">T</button>
       <button class="header-btn" onclick="exportData()" title="导出数据">↓</button>
       <button class="header-btn" onclick="triggerImport()" title="导入数据">↑</button>
@@ -217,7 +263,8 @@
   <div class="main-content">
     <div id="view-record" class="view active">
       <div class="date-row"><span class="date-label">📅 日期</span><input type="date" class="date-input" id="recordDate"></div>
-      <div class="section-title">BODY PART 训练部位</div>
+      <div class="record-mode-tabs"><button class="record-mode-tab active" data-mode="strength" onclick="setRecordMode('strength')">💪 力量</button><button class="record-mode-tab" data-mode="cardio" onclick="setRecordMode('cardio')">🏃 有氧</button></div>
+      <div id="strengthRecordPanel"><div class="section-title">BODY PART 训练部位</div>
       <div class="body-parts" id="bodyParts"></div>
       <div id="exerciseSection" class="exercise-section" style="display:none">
         <div class="section-title">EXERCISE 训练动作</div>
@@ -229,7 +276,13 @@
         <div id="setsList"></div>
         <button class="add-set-btn" onclick="addSet()">+ 添加一组</button>
       </div>
-      <div id="saveSection" style="display:none;margin-top:20px;animation:slideUp .35s ease"><button class="save-btn" onclick="saveRecord()">保存记录</button></div>
+      <div id="saveSection" style="display:none;margin-top:20px;animation:slideUp .35s ease"><button class="save-btn" onclick="saveRecord()">保存记录</button></div></div>
+      <div id="cardioRecordPanel" style="display:none"><div class="section-title">CARDIO 有氧类型</div>
+      <div class="cardio-type-chips" id="cardioTypeChips"></div>
+      <div class="cardio-fields" id="cardioFields"><div class="input-row" style="margin-bottom:12px"><span class="cardio-field-label">时长</span><input type="number" class="num-input" id="cardioDuration" placeholder="分钟" min="1" inputmode="numeric" style="flex:1"><span class="set-unit">分钟</span></div>
+      <div class="input-row cardio-field-distance" style="margin-bottom:12px"><span class="cardio-field-label">距离</span><input type="number" class="num-input" id="cardioDistance" placeholder="公里" min="0" step="0.01" inputmode="decimal" style="flex:1"><span class="set-unit">km</span></div>
+      <div class="input-row cardio-field-incline" style="margin-bottom:12px;display:none"><span class="cardio-field-label">坡度</span><input type="number" class="num-input" id="cardioIncline" placeholder="%" min="0" max="30" step="0.5" inputmode="decimal" style="flex:1"><span class="set-unit">%</span></div></div>
+      <button class="save-btn" onclick="saveCardioRecord()" style="margin-top:16px">保存有氧记录</button></div>
       <div class="today-log" id="todayLog"><div class="section-title">TODAY 今日记录</div><div id="todayLogList"></div></div>
     </div>
     <div id="view-history" class="view">
@@ -243,11 +296,38 @@
       <div class="section-title" style="margin-top:8px">TRENDS 力量趋势</div>
       <div class="trend-selector"><select class="trend-select" id="trendExercise" onchange="renderTrend()"><option value="">选择训练动作查看趋势</option></select></div>
       <div id="trendContent"></div>
+      <div class="section-title" style="margin-top:24px">TRENDS 有氧趋势</div>
+      <div class="trend-selector"><select class="trend-select" id="trendCardioType" onchange="renderCardioTrend()"><option value="">选择有氧类型查看趋势</option></select></div>
+      <div id="trendCardioContent"></div>
     </div>
     <div id="view-guide" class="view">
       <div class="section-title">ENCYCLOPEDIA 动作百科</div>
       <div class="guide-filters" id="guideFilters"></div>
       <div id="guideList"></div>
+    </div>
+    <div id="view-settings" class="view">
+      <div class="section-title">SETTINGS 账号管理</div>
+      <div class="add-user-form">
+        <div class="input-row"><input type="text" class="text-input" id="newUserName" placeholder="新账号"></div>
+        <div class="input-row"><input type="password" class="text-input" id="newUserPwd" placeholder="新密码"></div>
+        <button class="save-btn" onclick="addUser()">添加普通用户</button>
+        <div id="addUserResult" style="margin-top:12px;font-size:13px"></div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">用户列表</div>
+        <div id="userList"></div>
+      </div>
+    </div>
+    <div id="view-account" class="view">
+      <div class="section-title">ACCOUNT 修改账号</div>
+      <div class="pwd-warn">⚠️ 请妥善保管账号密码，修改后请务必记录</div>
+      <div style="margin-top:20px">
+        <div class="input-row" style="margin-bottom:12px"><input type="password" class="text-input" id="accountCurPwd" placeholder="当前密码（验证身份）"></div>
+        <div class="input-row" style="margin-bottom:12px"><input type="text" class="text-input" id="accountNewName" placeholder="新账号名（留空不变）"></div>
+        <div class="input-row" style="margin-bottom:12px"><input type="password" class="text-input" id="accountNewPwd" placeholder="新密码（留空不变）"></div>
+        <button class="save-btn" onclick="changeAccount()">保存修改</button>
+        <button class="add-set-btn" style="margin-top:16px" onclick="logout()">退出登录</button>
+      </div>
     </div>
   </div>
   <nav class="bottom-nav">
@@ -256,8 +336,8 @@
     <button class="nav-item" data-view="trends" onclick="switchView('trends')"><span class="nav-icon">📈</span><span class="nav-label">趋势</span></button>
     <button class="nav-item" data-view="guide" onclick="switchView('guide')"><span class="nav-icon">📖</span><span class="nav-label">百科</span></button>
   </nav>
-  <div class="toast" id="toast"></div>
 </div>
+<div class="toast" id="toast"></div>
 <script>
 const BP_SVG={
   chest:`<svg viewBox="0 0 48 36" fill="currentColor"><path d="M23 6C17 3 8 4 5 10C2 16 5 24 12 26C16 27 20 25 23 21L24 19L25 21C28 25 32 27 36 26C43 24 46 16 43 10C40 4 31 3 25 6L24 7L23 6Z"/></svg>`,
@@ -283,6 +363,12 @@ const DEFAULT_EXERCISES={
   arms:['杠铃弯举','哑铃弯举','锤式弯举','三头下压','碎颅者','法式弯举'],
   core:['卷腹','悬垂举腿','俄罗斯转体','平板支撑','腹肌轮'],
 };
+const CARDIO_TYPES=[
+  {id:'incline',name:'爬坡',icon:'⛰️',fields:['duration','incline','distance'],requireDistance:false},
+  {id:'run_indoor',name:'跑步·室内',icon:'🏃',fields:['duration','distance'],requireDistance:true},
+  {id:'run_outdoor',name:'跑步·室外',icon:'🏃‍♂️',fields:['duration','distance'],requireDistance:true},
+  {id:'hiking',name:'徒步',icon:'🥾',fields:['duration','distance'],requireDistance:true},
+];
 
 const EXERCISE_GUIDE={
   chest:[
@@ -399,11 +485,29 @@ const EXERCISE_GUIDE={
   ]
 };
 
-let state={records:[],selectedBodyPart:null,selectedExercise:'',sets:[{weight:'',reps:''}],historyFilter:'all',guideFilter:'all',guideFilterMine:false};
+let state={records:[],cardioRecords:[],selectedBodyPart:null,selectedExercise:'',sets:[{weight:'',reps:''}],recordMode:'strength',cardioType:'incline',cardioDuration:'',cardioDistance:'',cardioIncline:'',historyFilter:'all',historyCardioFilter:'all',guideFilter:'all',guideFilterMine:false};
 function matchExerciseToGuide(userEx,bpId){const exs=EXERCISE_GUIDE[bpId]||[];const u=String(userEx||'').trim();if(!u)return null;const exact=exs.find(e=>e.name===u);if(exact)return exact;const inc=exs.find(e=>e.name.includes(u)||u.includes(e.name));return inc||null}
 function getDifficultyStars(d){const s=['★☆☆','★★☆','★★★'];return s[Math.min(Math.max(0,d-1),2)]||'★☆☆'}
-function loadData(){try{const s=localStorage.getItem('forge_records');if(s)state.records=JSON.parse(s)}catch(e){state.records=[]}}
-function saveData(){localStorage.setItem('forge_records',JSON.stringify(state.records))}
+
+/* ===== Auth ===== */
+const AUTH_EXPIRY_DAYS=15;
+async function hashPwd(p){const b=new TextEncoder().encode(p);const h=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('')}
+function getAuth(){try{const s=localStorage.getItem('forge_auth');if(!s)return null;const a=JSON.parse(s);if(a.expiresAt<Date.now()){localStorage.removeItem('forge_auth');return null}return a}catch(e){return null}}
+function setAuth(username,role){const a={username,role,expiresAt:Date.now()+AUTH_EXPIRY_DAYS*86400000};localStorage.setItem('forge_auth',JSON.stringify(a))}
+function logout(){localStorage.removeItem('forge_auth');document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none'}
+async function getUsers(){try{let u=JSON.parse(localStorage.getItem('forge_users')||'[]');if(u.length===0){u=[{username:'DL24',passwordHash:await hashPwd('260303'),role:'admin',enabled:true}];localStorage.setItem('forge_users',JSON.stringify(u))}return u}catch(e){return []}}
+function saveUsers(u){localStorage.setItem('forge_users',JSON.stringify(u))}
+function getLoginFails(){try{const f=localStorage.getItem('forge_login_fails');return f?parseInt(f,10):0}catch(e){return 0}}
+function setLoginFails(n){try{localStorage.setItem('forge_login_fails',String(n))}catch(e){}}
+function getLoginLock(){try{const t=localStorage.getItem('forge_login_lock');return t?parseInt(t,10):0}catch(e){return 0}}
+function setLoginLock(ms){try{localStorage.setItem('forge_login_lock',String(Date.now()+ms))}catch(e){}}
+function clearLoginFails(){localStorage.removeItem('forge_login_fails');localStorage.removeItem('forge_login_lock')}
+async function doLogin(e){e.preventDefault();const user=document.getElementById('loginUser').value.trim(),pwd=document.getElementById('loginPwd').value;const err=document.getElementById('loginErr');err.textContent='';if(!user||!pwd){err.textContent='请输入账号和密码';showToast('请输入账号和密码');return false}const now=Date.now(),lockUntil=getLoginLock();if(lockUntil>now){const sec=Math.ceil((lockUntil-now)/1000);const msg=sec>=60?`请${Math.ceil(sec/60)}分钟后再试`:`请${sec}秒后再试`;err.textContent=msg;showToast(msg);return false}let users;try{users=await getUsers()}catch(ex){err.textContent='加载失败，请刷新重试';showToast('加载失败，请刷新重试');return false}const hp=await hashPwd(pwd);const u=users.find(x=>x.username===user&&x.enabled);let fail=false;if(!u)fail=true;else if(u.passwordHash!==hp)fail=true;if(fail){const fails=getLoginFails()+1;setLoginFails(fails);let msg;if(fails<=3){msg='账号或密码有误，请查验后输入'}else if(fails===4){setLoginLock(60000);msg='1分钟后再试'}else{setLoginLock(300000);msg='尝试过于频繁，5分钟后再试'}err.textContent=msg;showToast(msg);return false}clearLoginFails();setAuth(user,u.role);document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';initApp();return false}
+
+function recordsKey(){const a=getAuth();return a?'forge_records_'+a.username:'forge_records'}
+function cardioRecordsKey(){const a=getAuth();return a?'forge_cardio_'+a.username:'forge_cardio'}
+function loadData(){try{const s=localStorage.getItem(recordsKey());if(s)state.records=JSON.parse(s)}catch(e){state.records=[]};try{const c=localStorage.getItem(cardioRecordsKey());if(c)state.cardioRecords=JSON.parse(c)}catch(e){state.cardioRecords=[]}}
+function saveData(){localStorage.setItem(recordsKey(),JSON.stringify(state.records));localStorage.setItem(cardioRecordsKey(),JSON.stringify(state.cardioRecords))}
 function today(){return new Date().toISOString().split('T')[0]}
 function formatDate(d){const dt=new Date(d+'T00:00:00');const w=['日','一','二','三','四','五','六'];return`${dt.getMonth()+1}月${dt.getDate()}日 周${w[dt.getDay()]}`}
 function getBodyPart(id){return BODY_PARTS.find(b=>b.id===id)}
@@ -415,7 +519,16 @@ function getLast30DaysRange(){const end=today();const [ey,em,ed]=end.split('-').
 function initRecordView(){
   document.getElementById('recordDate').value=today();
   document.getElementById('bodyParts').innerHTML=BODY_PARTS.map(bp=>`<div class="bp-card" data-bp="${bp.id}" style="--bp-color:${bp.color};--bp-rgb:${bp.rgb}" onclick="selectBodyPart('${bp.id}')"><div class="bp-icon">${BP_SVG[bp.id]}</div><span class="bp-name">${bp.name}</span></div>`).join('');
+  renderCardioTypeChips();setRecordMode(state.recordMode);
 }
+function setRecordMode(mode){state.recordMode=mode;document.querySelectorAll('.record-mode-tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===mode));document.getElementById('strengthRecordPanel').style.display=mode==='strength'?'block':'none';document.getElementById('cardioRecordPanel').style.display=mode==='cardio'?'block':'none';if(mode==='cardio')updateCardioFieldsVisibility();renderTodayLog()}
+function renderCardioTypeChips(){document.getElementById('cardioTypeChips').innerHTML=CARDIO_TYPES.map(ct=>`<button class="cardio-type-chip ${state.cardioType===ct.id?'selected':''}" onclick="selectCardioType('${ct.id}')">${ct.icon} ${ct.name}</button>`).join('');updateCardioFieldsVisibility()}
+function selectCardioType(id){state.cardioType=id;state.cardioDuration='';state.cardioDistance='';state.cardioIncline='';document.getElementById('cardioDuration').value='';document.getElementById('cardioDistance').value='';document.getElementById('cardioIncline').value='';renderCardioTypeChips()}
+function updateCardioFieldsVisibility(){const ct=CARDIO_TYPES.find(c=>c.id===state.cardioType);document.querySelector('.cardio-field-distance').style.display=ct&&ct.fields.includes('distance')?'flex':'none';document.querySelector('.cardio-field-incline').style.display=ct&&ct.fields.includes('incline')?'flex':'none'}
+function getCardioType(id){return CARDIO_TYPES.find(c=>c.id===id)}
+function estimateCalories(type,durationMin,distanceKm,inclinePct){const w=70;let met=5;if(type==='incline')met=4+Math.min(15,(inclinePct||0)*0.5);else if(type==='run_indoor'||type==='run_outdoor'){const pace=distanceKm>0?durationMin/distanceKm:6;met=pace<=5?11:pace<=6?10:pace<=7?9:pace<=8?8:7}else if(type==='hiking')met=6;return Math.round(met*w*(durationMin/60))}
+function saveCardioRecord(){const d=document.getElementById('recordDate').value,type=state.cardioType,dur=parseFloat(document.getElementById('cardioDuration').value),dist=document.getElementById('cardioDistance').value.trim()?parseFloat(document.getElementById('cardioDistance').value):null,incl=document.getElementById('cardioIncline').value.trim()?parseFloat(document.getElementById('cardioIncline').value):null;const ct=getCardioType(type);if(!d||!dur||dur<=0){showToast('请输入日期和时长');return}if(ct&&ct.requireDistance&&(!dist||dist<=0)){showToast('请填写距离');return}const cal=estimateCalories(type,dur,dist,incl);state.cardioRecords.push({id:generateId(),date:d,type,duration:Math.round(dur),distance:dist,incline:incl,calories:cal});saveData();document.getElementById('cardioDuration').value='';document.getElementById('cardioDistance').value='';document.getElementById('cardioIncline').value='';renderTodayLog();showToast('✓ 有氧记录已保存')}
+function deleteCardioRecord(id){state.cardioRecords=state.cardioRecords.filter(r=>r.id!==id);saveData();renderTodayLog();renderHistory();showToast('已删除')}
 function selectBodyPart(id){state.selectedBodyPart=id;state.selectedExercise='';document.getElementById('exerciseInput').value='';document.querySelectorAll('.bp-card').forEach(e=>e.classList.toggle('selected',e.dataset.bp===id));renderExerciseSuggestions();document.getElementById('exerciseSection').style.display='block';document.getElementById('setsSection').style.display='none';document.getElementById('saveSection').style.display='none'}
 function getExercisesForBodyPart(id){const d=DEFAULT_EXERCISES[id]||[];const h=[...new Set(state.records.filter(r=>r.bodyPart===id).map(r=>r.exercise))];return[...new Set([...d,...h])]}
 function renderExerciseSuggestions(){const exs=getExercisesForBodyPart(state.selectedBodyPart);document.getElementById('exerciseSuggestions').innerHTML=exs.map(e=>`<button class="exercise-chip ${state.selectedExercise===e?'selected':''}" onclick="selectExercise('${e}')">${e}</button>`).join('')}
@@ -428,16 +541,19 @@ function updateSet(i,f,v){state.sets[i][f]=v?parseFloat(v):''}
 function addSet(){const l=state.sets[state.sets.length-1];state.sets.push({weight:l.weight||'',reps:l.reps||''});renderSets()}
 function deleteSet(i){if(state.sets.length>1){state.sets.splice(i,1);renderSets()}}
 function saveRecord(){const d=document.getElementById('recordDate').value,ex=state.selectedExercise.trim(),bp=state.selectedBodyPart;if(!d||!ex||!bp){showToast('请完整填写信息');return}const vs=state.sets.filter(s=>s.weight&&s.reps);if(!vs.length){showToast('请至少填写一组数据');return}state.records.push({id:generateId(),date:d,bodyPart:bp,exercise:ex,sets:vs.map(s=>({weight:Number(s.weight),reps:Number(s.reps)}))});saveData();state.selectedExercise='';state.sets=[{weight:'',reps:''}];document.getElementById('exerciseInput').value='';document.getElementById('setsSection').style.display='none';document.getElementById('saveSection').style.display='none';renderExerciseSuggestions();renderTodayLog();showToast('✓ 记录已保存')}
-function renderTodayLog(){const d=document.getElementById('recordDate').value,recs=state.records.filter(r=>r.date===d),c=document.getElementById('todayLogList');if(!recs.length){c.innerHTML='<div class="log-empty">尚无记录，开始你的训练吧</div>';return}c.innerHTML=recs.map(r=>{const bp=getBodyPart(r.bodyPart);return`<div class="log-item"><div class="log-item-color" style="background:${bp.color}"></div><div class="log-item-info"><div class="log-item-exercise">${r.exercise}</div><div class="log-item-detail">${r.sets.map(s=>`${s.weight}kg×${s.reps}`).join('  ')}</div></div><button class="log-item-delete" onclick="deleteRecord('${r.id}')">✕</button></div>`}).join('')}
+function renderTodayLog(){const d=document.getElementById('recordDate').value,recs=state.records.filter(r=>r.date===d),crecs=state.cardioRecords.filter(r=>r.date===d),c=document.getElementById('todayLogList');const strengthHtml=recs.map(r=>{const bp=getBodyPart(r.bodyPart);return`<div class="log-item"><div class="log-item-color" style="background:${bp.color}"></div><div class="log-item-info"><div class="log-item-exercise">${r.exercise}</div><div class="log-item-detail">${r.sets.map(s=>`${s.weight}kg×${s.reps}`).join('  ')}</div></div><button class="log-item-delete" onclick="deleteRecord('${r.id}')">✕</button></div>`}).join('');const cardioHtml=crecs.map(r=>{const ct=getCardioType(r.type);const pace=r.distance&&r.duration?` · 配速 ${(r.duration/r.distance).toFixed(1)}′/km`:'';const cal=r.calories?` · ${r.calories} kcal`:'';const detail=`${r.duration}分钟${r.distance?' · '+r.distance+'km':''}${r.incline!=null?' · 坡度'+r.incline+'%':''}${pace}${cal}`;return`<div class="log-item"><div class="log-item-color" style="background:var(--info)"></div><div class="log-item-info"><div class="log-item-exercise">${ct?ct.icon+' '+ct.name:r.type}</div><div class="log-item-detail">${detail}</div></div><button class="log-item-delete" onclick="deleteCardioRecord('${r.id}')">✕</button></div>`}).join('');if(!recs.length&&!crecs.length){c.innerHTML='<div class="log-empty">尚无记录，开始你的训练吧</div>';return}c.innerHTML=strengthHtml+cardioHtml}
 function deleteRecord(id){state.records=state.records.filter(r=>r.id!==id);saveData();renderTodayLog();renderHistory();showToast('已删除')}
 
-function renderHistory(){document.getElementById('historyFilters').innerHTML=`<button class="filter-chip ${state.historyFilter==='all'?'active':''}" onclick="setHistoryFilter('all')">全部</button>${BODY_PARTS.map(bp=>`<button class="filter-chip ${state.historyFilter===bp.id?'active':''}" onclick="setHistoryFilter('${bp.id}')"><span class="filter-dot" style="background:${bp.color}"></span>${bp.name}</button>`).join('')}`;let f=[...state.records];if(state.historyFilter!=='all')f=f.filter(r=>r.bodyPart===state.historyFilter);const g={};f.forEach(r=>{if(!g[r.date])g[r.date]=[];g[r.date].push(r)});const sd=Object.keys(g).sort((a,b)=>b.localeCompare(a)),c=document.getElementById('historyList');if(!sd.length){c.innerHTML='<div class="history-empty"><div style="font-size:40px;margin-bottom:12px;opacity:.5">📭</div><div style="font-size:14px">暂无训练记录</div></div>';return}const pm=computePRMap();c.innerHTML=sd.map(d=>`<div class="history-group"><div class="history-date">${formatDate(d)}</div>${g[d].map(r=>{const bp=getBodyPart(r.bodyPart),ip=pm[r.exercise]&&pm[r.exercise].id===r.id;return`<div class="history-card"><div class="history-card-head"><div class="history-bp-dot" style="background:${bp.color}"></div><div class="history-exercise">${r.exercise}</div>${ip?'<span class="history-pr-badge">PR</span>':''}</div><div class="history-sets">${r.sets.map(s=>`<span class="history-set-tag">${s.weight}kg × ${s.reps}</span>`).join('')}</div><div class="history-card-actions"><button class="history-del-btn" onclick="deleteRecord('${r.id}')">✕</button></div></div>`}).join('')}</div>`).join('')}
+function renderHistory(){document.getElementById('historyFilters').innerHTML=`<button class="filter-chip ${state.historyFilter==='all'?'active':''}" onclick="setHistoryFilter('all')">全部</button><button class="filter-chip ${state.historyFilter==='cardio'?'active':''}" onclick="setHistoryFilter('cardio')"><span class="filter-dot" style="background:var(--info)"></span>有氧</button>${BODY_PARTS.map(bp=>`<button class="filter-chip ${state.historyFilter===bp.id?'active':''}" onclick="setHistoryFilter('${bp.id}')"><span class="filter-dot" style="background:${bp.color}"></span>${bp.name}</button>`).join('')}`;let f=[...state.records];let cf=[...state.cardioRecords];if(state.historyFilter==='cardio'){f=[];const cg={};cf.forEach(r=>{if(!cg[r.date])cg[r.date]=[];cg[r.date].push(r)});const csd=Object.keys(cg).sort((a,b)=>b.localeCompare(a));const c=document.getElementById('historyList');if(!csd.length){c.innerHTML='<div class="history-empty"><div style="font-size:40px;margin-bottom:12px;opacity:.5">🏃</div><div style="font-size:14px">暂无有氧记录</div></div>';return}c.innerHTML=csd.map(d=>`<div class="history-group"><div class="history-date">${formatDate(d)}</div>${cg[d].map(r=>{const ct=getCardioType(r.type);const det=`${r.duration}分钟${r.distance?' · '+r.distance+'km':''}${r.incline!=null?' · 坡度'+r.incline+'%':''}${r.distance&&r.duration?' · 配速 '+(r.duration/r.distance).toFixed(1)+'′/km':''}${r.calories?' · '+r.calories+'kcal':''}`;return`<div class="history-card"><div class="history-card-head"><div class="history-bp-dot" style="background:var(--info)"></div><div class="history-exercise">${ct?ct.icon+' '+ct.name:r.type}</div></div><div class="history-sets"><span class="history-set-tag">${det}</span></div><div class="history-card-actions"><button class="history-del-btn" onclick="deleteCardioRecord('${r.id}')">✕</button></div></div>`}).join('')}</div>`).join('');return}if(state.historyFilter!=='all')f=f.filter(r=>r.bodyPart===state.historyFilter);const g={};f.forEach(r=>{if(!g[r.date])g[r.date]=[];g[r.date].push({...r,isCardio:false})});cf.forEach(r=>{if(state.historyFilter!=='all')return;if(!g[r.date])g[r.date]=[];g[r.date].push({...r,isCardio:true})});const sd=Object.keys(g).sort((a,b)=>b.localeCompare(a)),c=document.getElementById('historyList');if(!sd.length){c.innerHTML='<div class="history-empty"><div style="font-size:40px;margin-bottom:12px;opacity:.5">📭</div><div style="font-size:14px">暂无训练记录</div></div>';return}const pm=computePRMap();c.innerHTML=sd.map(d=>`<div class="history-group"><div class="history-date">${formatDate(d)}</div>${g[d].map(r=>{if(r.isCardio){const ct=getCardioType(r.type);const det=`${r.duration}分钟${r.distance?' · '+r.distance+'km':''}${r.incline!=null?' · 坡度'+r.incline+'%':''}${r.distance&&r.duration?' · 配速 '+(r.duration/r.distance).toFixed(1)+'′/km':''}${r.calories?' · '+r.calories+'kcal':''}`;return`<div class="history-card"><div class="history-card-head"><div class="history-bp-dot" style="background:var(--info)"></div><div class="history-exercise">${ct?ct.icon+' '+ct.name:r.type}</div></div><div class="history-sets"><span class="history-set-tag">${det}</span></div><div class="history-card-actions"><button class="history-del-btn" onclick="deleteCardioRecord('${r.id}')">✕</button></div></div>`}const bp=getBodyPart(r.bodyPart),ip=pm[r.exercise]&&pm[r.exercise].id===r.id;return`<div class="history-card"><div class="history-card-head"><div class="history-bp-dot" style="background:${bp.color}"></div><div class="history-exercise">${r.exercise}</div>${ip?'<span class="history-pr-badge">PR</span>':''}</div><div class="history-sets">${r.sets.map(s=>`<span class="history-set-tag">${s.weight}kg × ${s.reps}</span>`).join('')}</div><div class="history-card-actions"><button class="history-del-btn" onclick="deleteRecord('${r.id}')">✕</button></div></div>`}).join('')}</div>`).join('')}
 function setHistoryFilter(f){state.historyFilter=f;renderHistory()}
 function computePRMap(){const m={};state.records.forEach(r=>{const w=Math.max(...r.sets.map(s=>s.weight));if(!m[r.exercise]||w>m[r.exercise].weight)m[r.exercise]={weight:w,id:r.id,date:r.date}});return m}
 
 function renderSummary(){
   const c=document.getElementById('summaryContainer');
-  if(!state.records.length){c.innerHTML='<div class="summary-card"><div class="summary-empty">开始记录训练后<br>这里会显示训练小结和智能分析</div></div>';return}
+  const r30=getLast30DaysRange();
+  const l30=state.records.filter(r=>r.date>=r30.start&&r.date<=r30.end);
+  const l30Cardio=state.cardioRecords.filter(r=>r.date>=r30.start&&r.date<=r30.end);
+  if(!state.records.length&&!state.cardioRecords.length){c.innerHTML='<div class="summary-card"><div class="summary-empty">开始记录训练后<br>这里会显示训练小结和智能分析</div></div>';return}
   const ts=today();const [ty,tm,td]=ts.split('-').map(Number);const tdObj=new Date(ty,tm-1,td);
   const ws=new Date(tdObj);ws.setDate(tdObj.getDate()-tdObj.getDay()+(tdObj.getDay()===0?-6:1));
   const lw=new Date(ws);lw.setDate(ws.getDate()-7);
@@ -445,21 +561,23 @@ function renderSummary(){
   const twr=state.records.filter(r=>r.date>=fmt(ws)&&r.date<=ts);
   const lwr=state.records.filter(r=>r.date>=fmt(lw)&&r.date<fmt(ws));
   const twd=new Set(twr.map(r=>r.date)).size,lwd=new Set(lwr.map(r=>r.date)).size,wd=twd-lwd;
-  const r30=getLast30DaysRange();
-  const l30=state.records.filter(r=>r.date>=r30.start&&r.date<=r30.end);
   const tda=new Set(l30.map(r=>r.date)).size;
   const tdc=l30.length;
   const bc={};BODY_PARTS.forEach(b=>bc[b.id]=0);l30.forEach(r=>{if(bc[r.bodyPart]!==undefined)bc[r.bodyPart]++});
   const mbc=Math.max(...Object.values(bc),1),tp=Object.values(bc).filter(v=>v>0).length;
-  const insights=generateInsights(l30,ts,bc);
+  const cardioDist=l30Cardio.reduce((s,r)=>s+(r.distance||0),0).toFixed(1);
+  const cardioMins=l30Cardio.reduce((s,r)=>s+r.duration,0);
+  const cardioCal=l30Cardio.reduce((s,r)=>s+(r.calories||0),0);
+  const insights=generateInsights(l30,ts,bc,l30Cardio);
   const assessment=generateAssessment(l30,ts,bc,twd,lwd);
   const rt=computeOverallTrend(l30);
   let si,sc,st;
-  if(l30.length<3){si='🏋️';sc='new';st='继续积累数据'}
+  if(l30.length<3&&!l30Cardio.length){si='🏋️';sc='new';st='继续积累数据'}
   else if(rt>0.5){si='🔥';sc='up';st='力量上升中'}
   else if(rt>-0.5){si='⚡';sc='stable';st='稳步推进中'}
   else{si='📉';sc='down';st='注意恢复'}
-  c.innerHTML=`<div class="summary-card"><div class="summary-header"><div class="summary-status-icon ${sc}">${si}</div><div class="summary-status-text"><div class="summary-status-label">RECENT STATUS 近期状态</div><div class="summary-status-value ${sc}">${st}</div></div></div><div class="summary-metrics"><div class="summary-metric"><div class="summary-metric-value">${twd}</div><div class="summary-metric-label">本周训练</div><div class="summary-metric-sub ${wd>0?'up':wd<0?'down':''}">${wd>0?'↑'+wd:wd<0?'↓'+Math.abs(wd):'—'} vs上周</div></div><div class="summary-metric"><div class="summary-metric-value">${lwd}</div><div class="summary-metric-label">上周训练</div><div class="summary-metric-sub">天数</div></div><div class="summary-metric"><div class="summary-metric-value">${tdc}</div><div class="summary-metric-label">30天内</div><div class="summary-metric-sub">${tda} 天</div></div><div class="summary-metric"><div class="summary-metric-value">${tp}</div><div class="summary-metric-label">部位覆盖</div><div class="summary-metric-sub">/ ${BODY_PARTS.length} 部位</div></div></div><div class="summary-coverage"><div class="summary-coverage-title">30天部位分布</div><div class="coverage-bars">${BODY_PARTS.map(bp=>{const cnt=bc[bp.id],pct=mbc>0?(cnt/mbc*100):0;return`<div class="coverage-row"><span class="coverage-label">${bp.name}</span><div class="coverage-bar-bg"><div class="coverage-bar-fill" style="width:${pct}%;background:${bp.color}"></div></div><span class="coverage-count">${cnt}</span></div>`}).join('')}</div></div>${assessment?`<div class="summary-assessment"><div class="summary-coverage-title">教练点评</div><div class="assessment-text">${assessment}</div></div>`:''}<div class="summary-insights"><div class="summary-insights-title">训练洞察</div>${insights.map(i=>`<div class="insight-item"><span class="insight-icon">${i.icon}</span><span class="insight-text">${i.text}</span></div>`).join('')}</div></div>`;
+  const cardioBlock=l30Cardio.length>0?`<div class="summary-coverage" style="border-top:1px solid var(--border)"><div class="summary-coverage-title">30天有氧统计</div><div class="coverage-bars"><div class="coverage-row"><span class="coverage-label">距离</span><div class="coverage-bar-bg"><div class="coverage-bar-fill" style="width:100%;background:var(--info)"></div></div><span class="coverage-count">${cardioDist}km</span></div><div class="coverage-row"><span class="coverage-label">时长</span><div class="coverage-bar-bg"><div class="coverage-bar-fill" style="width:100%;background:var(--info)"></div></div><span class="coverage-count">${cardioMins}分钟</span></div><div class="coverage-row"><span class="coverage-label">消耗</span><div class="coverage-bar-bg"><div class="coverage-bar-fill" style="width:100%;background:var(--info)"></div></div><span class="coverage-count">${cardioCal} kcal</span></div></div></div>`:'';
+  c.innerHTML=`<div class="summary-card"><div class="summary-header"><div class="summary-status-icon ${sc}">${si}</div><div class="summary-status-text"><div class="summary-status-label">RECENT STATUS 近期状态</div><div class="summary-status-value ${sc}">${st}</div></div></div><div class="summary-metrics"><div class="summary-metric"><div class="summary-metric-value">${twd}</div><div class="summary-metric-label">本周训练</div><div class="summary-metric-sub ${wd>0?'up':wd<0?'down':''}">${wd>0?'↑'+wd:wd<0?'↓'+Math.abs(wd):'—'} vs上周</div></div><div class="summary-metric"><div class="summary-metric-value">${lwd}</div><div class="summary-metric-label">上周训练</div><div class="summary-metric-sub">天数</div></div><div class="summary-metric"><div class="summary-metric-value">${tdc}</div><div class="summary-metric-label">30天内</div><div class="summary-metric-sub">${tda} 天</div></div><div class="summary-metric"><div class="summary-metric-value">${tp}</div><div class="summary-metric-label">部位覆盖</div><div class="summary-metric-sub">/ ${BODY_PARTS.length} 部位</div></div></div><div class="summary-coverage"><div class="summary-coverage-title">30天部位分布</div><div class="coverage-bars">${BODY_PARTS.map(bp=>{const cnt=bc[bp.id],pct=mbc>0?(cnt/mbc*100):0;return`<div class="coverage-row"><span class="coverage-label">${bp.name}</span><div class="coverage-bar-bg"><div class="coverage-bar-fill" style="width:${pct}%;background:${bp.color}"></div></div><span class="coverage-count">${cnt}</span></div>`}).join('')}</div></div>${cardioBlock}${assessment?`<div class="summary-assessment"><div class="summary-coverage-title">教练点评</div><div class="assessment-text">${assessment}</div></div>`:''}<div class="summary-insights"><div class="summary-insights-title">训练洞察</div>${insights.map(i=>`<div class="insight-item"><span class="insight-icon">${i.icon}</span><span class="insight-text">${i.text}</span></div>`).join('')}</div></div>`;
 }
 
 function generateAssessment(l30,ts,bc,thisWeekDays,lastWeekDays){
@@ -507,14 +625,15 @@ function generateAssessment(l30,ts,bc,thisWeekDays,lastWeekDays){
 
 function computeOverallTrend(recs){if(recs.length<4)return-1000;const exs=[...new Set(recs.map(r=>r.exercise))];let t=0,c=0;exs.forEach(ex=>{const er=recs.filter(r=>r.exercise===ex).sort((a,b)=>a.date.localeCompare(b.date));if(er.length<2)return;const h=Math.floor(er.length/2),f=er.slice(0,h),s=er.slice(h);const af=f.reduce((s,r)=>s+Math.max(...r.sets.map(ss=>ss.weight)),0)/f.length,as=s.reduce((s,r)=>s+Math.max(...r.sets.map(ss=>ss.weight)),0)/s.length;if(af>0){t+=(as-af)/af*100;c++}});return c>0?t/c:-1000}
 
-function generateInsights(l30,ts,bc){
+function generateInsights(l30,ts,bc,l30Cardio){
   const ins=[];const pm=computePRMap();
   Object.entries(pm).filter(([,pr])=>{const d=daysBetween(pr.date,ts);return d<=14&&d>=0}).forEach(([ex,pr])=>{ins.push({icon:'🏆',text:`${ex} 达到 ${pr.weight}kg 个人最佳！`})});
   const exs=[...new Set(l30.map(r=>r.exercise))];
   exs.forEach(ex=>{const er=l30.filter(r=>r.exercise===ex).sort((a,b)=>a.date.localeCompare(b.date));if(er.length>=3){const r3=er.slice(-3),mw=r3.map(r=>Math.max(...r.sets.map(s=>s.weight))),p=((mw[2]-mw[0])/mw[0]*100).toFixed(0);if(mw[2]>mw[0]&&Math.abs(p)>=3)ins.push({icon:'📈',text:`${ex} 近3次最大重量上升 ${p}%，保持势头！`});else if(mw[2]<mw[0]&&Math.abs(p)>=5)ins.push({icon:'⚠️',text:`${ex} 近3次重量下降 ${Math.abs(p)}%，注意休息恢复`})}});
   const tsets=l30.reduce((s,r)=>s+r.sets.length,0),tvol=l30.reduce((s,r)=>s+r.sets.reduce((ss,set)=>ss+set.weight*set.reps,0),0);
-  if(tvol>0)ins.push({icon:'📊',text:`30天累计 ${tsets} 组训练，总训练量 ${(tvol/1000).toFixed(1)} 吨`});
-  const allDates=[...new Set(state.records.map(r=>r.date))].sort((a,b)=>b.localeCompare(a));
+  if(tvol>0)ins.push({icon:'📊',text:`30天累计 ${tsets} 组力量训练，总训练量 ${(tvol/1000).toFixed(1)} 吨`});
+  if(l30Cardio&&l30Cardio.length>0){const cd=l30Cardio.reduce((s,r)=>s+(r.distance||0),0),cc=l30Cardio.reduce((s,r)=>s+(r.calories||0),0);if(cd>0)ins.push({icon:'🏃',text:`30天有氧 ${cd.toFixed(1)}km${cc>0?'，约 '+cc+' kcal 消耗':''}`})}
+  const allDates=[...new Set([...state.records.map(r=>r.date),...state.cardioRecords.map(r=>r.date)])].sort((a,b)=>b.localeCompare(a));
   if(allDates.length>=2){let streak=0;for(let i=0;i<allDates.length-1;i++){if(daysBetween(allDates[i+1],allDates[i])<=3)streak++;else break}if(streak>=3)ins.push({icon:'🔥',text:`已连续训练 ${streak+1} 次，坚持就是胜利！`})}
   return ins.slice(0,8);
 }
@@ -526,6 +645,8 @@ function renderTrend(){const ex=document.getElementById('trendExercise').value,c
 c.innerHTML=`<div class="stats-grid"><div class="stat-card"><div class="stat-value">${cur}<span style="font-size:14px;color:var(--text-3)">kg</span></div><div class="stat-label">当前最大</div></div><div class="stat-card"><div class="stat-value ${Number(prog)>=0?'positive':'negative'}">${Number(prog)>=0?'+':''}${prog}%</div><div class="stat-label">总进步</div></div><div class="stat-card"><div class="stat-value">${atm}<span style="font-size:14px;color:var(--text-3)">kg</span></div><div class="stat-label">历史最佳 PR</div></div><div class="stat-card"><div class="stat-value">${recs.length}</div><div class="stat-label">训练次数</div></div></div><div class="chart-container"><div class="chart-title">最大重量趋势 (KG)</div><div class="chart-wrapper"><canvas id="maxWeightChart"></canvas></div></div><div class="chart-container"><div class="chart-title">训练容量趋势 (KG × REPS)</div><div class="chart-wrapper"><canvas id="volumeChart"></canvas></div></div><div class="chart-container"><div class="chart-title">PR 记录</div><div class="pr-list" id="prList"></div></div>`;
 renderCharts(dates,mw,vols,bp);renderPRList(recs)}
 
+function populateCardioTrendSelect(){const s=document.getElementById('trendCardioType'),cv=s.value,gm={};state.cardioRecords.forEach(r=>{gm[r.type]=true});let h='<option value="">选择有氧类型查看趋势</option>';CARDIO_TYPES.forEach(ct=>{if(gm[ct.id])h+=`<option value="${ct.id}" ${ct.id===cv?'selected':''}>${ct.icon} ${ct.name}</option>`});s.innerHTML=h}
+function renderCardioTrend(){const type=document.getElementById('trendCardioType').value,c=document.getElementById('trendCardioContent');if(!type){c.innerHTML='';return}const recs=state.cardioRecords.filter(r=>r.type===type).sort((a,b)=>a.date.localeCompare(b.date));if(!recs.length){c.innerHTML='<div class="trend-empty">暂无数据</div>';return}const ct=getCardioType(type);const dates=recs.map(r=>formatDate(r.date)),dist=recs.map(r=>r.distance||0),cals=recs.map(r=>r.calories||0),pace=recs.map(r=>r.distance&&r.duration?(r.duration/r.distance).toFixed(1):'—');c.innerHTML=`<div class="stats-grid"><div class="stat-card"><div class="stat-value">${recs.reduce((s,r)=>s+(r.distance||0),0).toFixed(1)}<span style="font-size:14px;color:var(--text-3)">km</span></div><div class="stat-label">总距离</div></div><div class="stat-card"><div class="stat-value">${recs.reduce((s,r)=>s+(r.calories||0),0)}<span style="font-size:14px;color:var(--text-3)">kcal</span></div><div class="stat-label">总消耗</div></div><div class="stat-card"><div class="stat-value">${recs.length}</div><div class="stat-label">训练次数</div></div><div class="stat-card"><div class="stat-value">${recs.filter(r=>r.distance).length?((recs.reduce((s,r)=>s+(r.distance?r.duration/r.distance:0),0)/recs.filter(r=>r.distance).length)).toFixed(1):'—'}<span style="font-size:14px;color:var(--text-3)">′/km</span></div><div class="stat-label">平均配速</div></div></div><div class="chart-container"><div class="chart-title">距离趋势 (KM)</div><div class="chart-wrapper"><canvas id="cardioDistChart"></canvas></div></div>`;const sd=dates.map(d=>{const m=d.match(/(\d+)月(\d+)日/);return m?`${m[1]}/${m[2]}`:d});const xa={grid:{color:'rgba(255,255,255,.04)',drawTicks:false},ticks:{color:'#5C5C6E',font:{size:11,family:'Space Mono'},maxRotation:0,autoSkip:true,maxTicksLimit:8,padding:6},border:{display:false}},tt={backgroundColor:'#1E1E26',titleColor:'#EEEEF2',bodyColor:'#9999AA',borderColor:'#2A2A36',borderWidth:1,cornerRadius:8,padding:12,displayColors:false};if(window.cardioDistChart)window.cardioDistChart.destroy();window.cardioDistChart=new Chart(document.getElementById('cardioDistChart').getContext('2d'),{type:'bar',data:{labels:sd,datasets:[{data:dist,backgroundColor:'rgba(59,130,246,0.45)',hoverBackgroundColor:'rgba(59,130,246,0.7)',borderColor:'#3B82F6',borderWidth:1.5,borderRadius:6,borderSkipped:false,maxBarThickness:36}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{title:i=>dates[i[0].dataIndex],label:i=>`距离: ${i.raw} km`}}},scales:{x:xa,y:{grid:{color:'rgba(255,255,255,.04)',drawTicks:false},border:{display:false},ticks:{color:'#5C5C6E',font:{size:11,family:'Space Mono'},padding:8},beginAtZero:true}},interaction:{intersect:false,mode:'index'},layout:{padding:{top:8,right:4,bottom:4,left:4}}}})}
 function renderCharts(dates,mw,vols,bp){
   const sd=dates.map(shortDate),mp=dates.length>8,tt={backgroundColor:'#1E1E26',titleColor:'#EEEEF2',bodyColor:'#9999AA',borderColor:'#2A2A36',borderWidth:1,cornerRadius:8,padding:12,titleFont:{family:'Space Mono',size:12},bodyFont:{family:'Space Mono',size:12},displayColors:false},
   xa={grid:{color:'rgba(255,255,255,.04)',drawTicks:false},ticks:{color:'#5C5C6E',font:{size:11,family:'Space Mono'},maxRotation:0,autoSkip:true,maxTicksLimit:mp?6:10,padding:6},border:{display:false}},
@@ -606,15 +727,22 @@ function toggleGuide(el){el.closest('.guide-card').classList.toggle('open')}
 function setGuideFilter(f){state.guideFilter=f;state.guideFilterMine=false;renderGuide()}
 function setGuideFilterMine(v){state.guideFilterMine=v;renderGuide()}
 
-function switchView(v){document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===v));if(v==='history')renderHistory();if(v==='trends'){renderSummary();populateExerciseSelect();renderTrend()}if(v==='record')renderTodayLog();if(v==='guide')renderGuide();document.querySelector('.main-content').scrollTop=0}
+async function addUser(){const a=getAuth();if(!a||a.role!=='admin'){showToast('无权限');return}const un=document.getElementById('newUserName').value.trim(),pw=document.getElementById('newUserPwd').value;const res=document.getElementById('addUserResult');if(!un||!pw){res.innerHTML='<span style="color:var(--danger)">请输入账号和密码</span>';return}const users=await getUsers();if(users.some(u=>u.username===un)){res.innerHTML='<span style="color:var(--danger)">账号已存在</span>';return}const nh=await hashPwd(pw);users.push({username:un,passwordHash:nh,role:'user',enabled:true});saveUsers(users);document.getElementById('newUserName').value='';document.getElementById('newUserPwd').value='';window._lastCreds={un,pw};res.innerHTML=`<span style="color:var(--success)">已创建账号，请复制保存：</span><br><code>账号: ${un} 密码: ${pw}</code> <button class="header-btn" style="display:inline-flex;margin-left:8px" onclick="copyLastCreds()">复制</button>`;renderUserList();showToast('用户已添加')}
+async function renderUserList(){const users=await getUsers();document.getElementById('userList').innerHTML=users.map(u=>`<div class="user-card"><div class="user-card-info"><div class="user-card-name">${u.username}</div><div class="user-card-role">${u.role==='admin'?'管理员':u.enabled?'普通用户':'已禁用'}</div></div><div class="user-card-actions">${u.role!=='admin'?`<div class="user-toggle ${u.enabled?'on':''}" onclick="toggleUser('${u.username}')" title="${u.enabled?'禁用':'启用'}"></div>`:''}</div></div>`).join('')}
+function copyLastCreds(){if(window._lastCreds)navigator.clipboard.writeText('账号: '+window._lastCreds.un+' 密码: '+window._lastCreds.pw).then(()=>showToast('已复制')).catch(()=>showToast('复制失败'))}
+async function toggleUser(username){const users=await getUsers();const u=users.find(x=>x.username===username);if(!u||u.role==='admin')return;u.enabled=!u.enabled;saveUsers(users);renderUserList();showToast(u.enabled?'已启用':'已禁用')}
+async function changeAccount(){const cur=document.getElementById('accountCurPwd').value,newName=document.getElementById('accountNewName').value.trim(),newPwd=document.getElementById('accountNewPwd').value;const auth=getAuth();if(!auth)return;const users=await getUsers();const u=users.find(x=>x.username===auth.username);if(!u){showToast('用户不存在');return}const ch=await hashPwd(cur);if(u.passwordHash!==ch){showToast('当前密码错误');return}let changed=false;if(newName&&newName!==auth.username){if(users.some(x=>x.username===newName)){showToast('新账号名已存在');return}const mig=['forge_records_','forge_cardio_'];mig.forEach(pre=>{const oldKey=pre+auth.username,newKey=pre+newName,oldData=localStorage.getItem(oldKey);if(oldData){localStorage.setItem(newKey,oldData);localStorage.removeItem(oldKey)}});u.username=newName;auth.username=newName;setAuth(newName,auth.role);changed=true}if(newPwd){u.passwordHash=await hashPwd(newPwd);changed=true}if(changed){saveUsers(users);document.getElementById('accountCurPwd').value='';document.getElementById('accountNewName').value='';document.getElementById('accountNewPwd').value='';loadData();showToast('已保存，请妥善保管新密码');if(auth.role==='admin')document.getElementById('btnSettings').style.display='flex'}else{showToast('请至少填写一项修改')}}
 
-function exportData(){const b=new Blob([JSON.stringify(state.records,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`forge-backup-${today()}.json`;a.click();URL.revokeObjectURL(u);showToast('数据已导出')}
+function maybeBack(){const active=document.querySelector('.view.active');if(active&&(active.id==='view-settings'||active.id==='view-account'))switchView('record')}
+function switchView(v){const a=getAuth();if((v==='settings')&&(!a||a.role!=='admin'))return;const nav=document.querySelector('.bottom-nav');nav.style.display=(v==='settings'||v==='account')?'none':'flex';document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===v));if(v==='history')renderHistory();if(v==='trends'){renderSummary();populateExerciseSelect();populateCardioTrendSelect();renderTrend();renderCardioTrend()}if(v==='record')renderTodayLog();if(v==='guide')renderGuide();if(v==='settings')renderUserList();document.querySelector('.main-content').scrollTop=0}
+
+function exportData(){const data={records:state.records,cardioRecords:state.cardioRecords};const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`forge-backup-${today()}.json`;a.click();URL.revokeObjectURL(u);showToast('数据已导出')}
 function exportTemplate(){const h=[['日期','部位','动作','重量(kg)','次数']],s=[['2025-02-28','腿','哈克深蹲',150,10],['2025-02-28','腿','哈克深蹲',150,8],['2025-02-28','腿','深蹲',120,12],['2025-02-21','胸','卧推',80,10]];const ws=XLSX.utils.aoa_to_sheet([...h,...s]);ws['!cols']=[{wch:12},{wch:8},{wch:14},{wch:10},{wch:6}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'训练记录');XLSX.writeFile(wb,'forge-template.xlsx');showToast('模板已下载')}
 function triggerImport(){document.getElementById('importFile').click()}
 function importData(event){
   const file=event.target.files[0];if(!file)return;const ext=file.name.split('.').pop().toLowerCase();
-  if(ext==='json'){const r=new FileReader();r.onload=function(e){try{const imp=JSON.parse(e.target.result);if(Array.isArray(imp)){const ids=new Set(state.records.map(r=>r.id));let n=0;imp.forEach(r=>{if(!ids.has(r.id)){state.records.push(r);n++}});saveData();renderTodayLog();renderSummary();showToast(`已导入 ${n} 条新记录`)}else showToast('文件格式不正确')}catch(err){showToast('导入失败')}};r.readAsText(file)}
-  else if(['xlsx','xls','csv'].includes(ext)){const r=new FileReader();r.onload=function(e){try{const d=new Uint8Array(e.target.result),wb=XLSX.read(d,{type:'array',cellDates:true}),sh=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(sh,{header:1,raw:false,dateNF:'yyyy-mm-dd'}),res=parseExcelRows(rows);if(res.error){showToast(res.error);return}const ids=new Set(state.records.map(r=>r.id));let n=0;res.records.forEach(r=>{if(!ids.has(r.id)){state.records.push(r);n++}});saveData();renderTodayLog();renderSummary();showToast(`已从 Excel 导入 ${n} 条记录`)}catch(err){console.error(err);showToast('Excel 解析失败')}};r.readAsArrayBuffer(file)}
+  if(ext==='json'){const r=new FileReader();r.onload=function(e){try{const imp=JSON.parse(e.target.result);let nr=0,nc=0;if(Array.isArray(imp)){const ids=new Set(state.records.map(r=>r.id));imp.forEach(x=>{if(!ids.has(x.id)){state.records.push(x);nr++;ids.add(x.id)}})}else if(imp&&typeof imp==='object'){if(Array.isArray(imp.records)){const ids=new Set(state.records.map(r=>r.id));imp.records.forEach(x=>{if(!ids.has(x.id)){state.records.push(x);nr++;ids.add(x.id)}})}if(Array.isArray(imp.cardioRecords)){const cids=new Set(state.cardioRecords.map(r=>r.id));imp.cardioRecords.forEach(x=>{if(!cids.has(x.id)){state.cardioRecords.push(x);nc++;cids.add(x.id)}})}}else{showToast('文件格式不正确');return}if(nr>0||nc>0){saveData();renderTodayLog();renderHistory();renderSummary();populateExerciseSelect();showToast(`已导入 ${nr} 条力量、${nc} 条有氧`)}else showToast('未发现新数据')}catch(err){showToast('导入失败')}};r.readAsText(file)}
+  else if(['xlsx','xls','csv'].includes(ext)){const r=new FileReader();r.onload=function(e){try{const d=new Uint8Array(e.target.result),wb=XLSX.read(d,{type:'array',cellDates:true}),sh=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(sh,{header:1,raw:false,dateNF:'yyyy-mm-dd'}),res=parseExcelRows(rows);if(res.error){showToast(res.error);return}const ids=new Set(state.records.map(r=>r.id));let n=0;res.records.forEach(r=>{if(!ids.has(r.id)){state.records.push(r);n++}});saveData();renderTodayLog();renderHistory();renderSummary();populateExerciseSelect();showToast(`已从 Excel 导入 ${n} 条记录`)}catch(err){console.error(err);showToast('Excel 解析失败')}};r.readAsArrayBuffer(file)}
   else showToast('不支持的文件格式');
   event.target.value='';
 }
@@ -625,7 +753,8 @@ function parseExcelDate(raw){if(raw==null||raw==='')return null;if(typeof raw===
 function detectColumns(hr){const m={date:-1,bodyPart:-1,exercise:-1,weight:-1,reps:-1};const dw=['日期','date','时间'],bw=['部位','肌群','body','muscle','part'],ew=['动作','项目','练习','exercise','名称','训练'],ww=['重量','weight','kg','负重'],rw=['次数','reps','次','rep'];hr.forEach((c,i)=>{const s=String(c||'').toLowerCase().trim();if(m.date===-1&&dw.some(w=>s.includes(w)))m.date=i;else if(m.bodyPart===-1&&bw.some(w=>s.includes(w)))m.bodyPart=i;else if(m.exercise===-1&&ew.some(w=>s.includes(w)))m.exercise=i;else if(m.weight===-1&&ww.some(w=>s.includes(w)))m.weight=i;else if(m.reps===-1&&rw.some(w=>s.includes(w)))m.reps=i});return m}
 function parseExcelRows(rows){if(rows.length<2)return{error:'文件为空'};let cm=detectColumns(rows[0]),ds=1;if(cm.date===-1||cm.exercise===-1||cm.weight===-1){cm=detectColumns(rows.length>1?rows[1]:[]);if(cm.date===-1||cm.exercise===-1||cm.weight===-1){cm={date:0,bodyPart:1,exercise:2,weight:3,reps:4};ds=1}else ds=2}const gp={};let ld=null,lb=null;for(let i=ds;i<rows.length;i++){const row=rows[i];if(!row||!row.length||row.every(c=>!c&&c!==0))continue;let dv=cm.date>=0?parseExcelDate(row[cm.date]):null;if(!dv&&ld)dv=ld;if(!dv)continue;ld=dv;let bv=cm.bodyPart>=0?resolveBodyPart(row[cm.bodyPart]):null;if(!bv&&lb)bv=lb;if(bv)lb=bv;const ex=cm.exercise>=0?String(row[cm.exercise]||'').trim():'';if(!ex)continue;if(!bv){for(const[bid,el]of Object.entries(DEFAULT_EXERCISES))if(el.includes(ex)){bv=bid;break}}if(!bv)bv='chest';const w=parseFloat(row[cm.weight])||0,rp=cm.reps>=0?(parseInt(row[cm.reps])||0):0;if(w<=0)continue;const k=`${dv}|${bv}|${ex}`;if(!gp[k])gp[k]={date:dv,bodyPart:bv,exercise:ex,sets:[]};gp[k].sets.push({weight:w,reps:rp||1})}const recs=Object.values(gp).map(g=>({id:generateId(),date:g.date,bodyPart:g.bodyPart,exercise:g.exercise,sets:g.sets}));if(!recs.length)return{error:'未识别到有效数据'};return{records:recs}}
 
-loadData();initRecordView();renderTodayLog();
+function initApp(){loadData();initRecordView();renderTodayLog();const a=getAuth();document.getElementById('btnSettings').style.display=a&&a.role==='admin'?'flex':'none'}
+(function onLoad(){const a=getAuth();if(a){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';initApp()}else{document.getElementById('app').style.display='none'}})();
 </script>
 </body>
 </html>
