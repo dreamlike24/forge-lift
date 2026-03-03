@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FORGE · 锻记</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+SC:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg:#0A0A0C;--surface:#131318;--surface-2:#1B1B22;--surface-3:#24242E;--border:#2A2A36;
+      --text:#EEEEF2;--text-2:#9999AA;--text-3:#5C5C6E;
+      --accent:#D49A1E;--accent-glow:#E8AD2A;--accent-dim:rgba(212,154,30,0.15);
+      --success:#22C55E;--success-dim:rgba(34,197,94,0.15);
+      --danger:#EF4444;--danger-dim:rgba(239,68,68,0.15);
+      --warning:#F59E0B;--info:#3B82F6;--info-dim:rgba(59,130,246,0.15);
+      --chest:#FF6B6B;--shoulders:#4ECDC4;--back:#45B7D1;--legs:#F7C948;--arms:#BB8FCE;--core:#82E0AA;
+      --radius:12px;--radius-sm:8px;--radius-xs:6px;--nav-h:68px;--header-h:56px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;font-family:'Noto Sans SC',-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;-webkit-font-smoothing:antialiased}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 600px 400px at 50% 0%,rgba(212,154,30,.06) 0%,transparent 70%),repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(255,255,255,.015) 59px,rgba(255,255,255,.015) 60px),repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(255,255,255,.015) 59px,rgba(255,255,255,.015) 60px);pointer-events:none;z-index:0}
+    #app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
+    .app-header{height:var(--header-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0;border-bottom:1px solid var(--border);background:rgba(10,10,12,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+    .app-logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--accent);text-shadow:0 0 30px rgba(212,154,30,.3)}
+    .app-logo span{color:var(--text-2);font-family:'Noto Sans SC',sans-serif;font-size:13px;font-weight:300;letter-spacing:1px;margin-left:8px}
+    .header-actions{display:flex;gap:8px}
+    .header-btn{width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .header-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .main-content{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h)+20px);scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+    .main-content::-webkit-scrollbar{display:none}
+    .view{display:none;padding:20px;animation:fadeIn .3s ease}.view.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+    @keyframes prGlow{0%,100%{box-shadow:0 0 8px rgba(34,197,94,.3)}50%{box-shadow:0 0 20px rgba(34,197,94,.5)}}
+    .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:var(--nav-h);display:flex;align-items:center;justify-content:space-around;background:rgba(13,13,18,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+    .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 14px;border-radius:var(--radius);cursor:pointer;transition:all .25s;position:relative;border:none;background:none;color:var(--text-3);font-family:inherit}
+    .nav-item .nav-icon{font-size:20px;transition:transform .25s}.nav-item .nav-label{font-size:10px;font-weight:500;letter-spacing:.3px}
+    .nav-item.active{color:var(--accent)}.nav-item.active .nav-icon{transform:scale(1.1)}
+    .nav-item.active::before{content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:20px;height:2px;background:var(--accent);border-radius:2px}
+    .section-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--text-2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .section-title::before{content:'';width:3px;height:16px;background:var(--accent);border-radius:2px}
+    .body-parts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+    .bp-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 8px 12px;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+    .bp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--bp-color);opacity:0;transition:opacity .25s}
+    .bp-card:hover{border-color:var(--bp-color)}.bp-card:hover::before{opacity:.6}
+    .bp-card.selected{border-color:var(--bp-color);background:var(--surface-2);box-shadow:0 0 20px rgba(var(--bp-rgb),.1)}.bp-card.selected::before{opacity:1}
+    .bp-icon{width:38px;height:38px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;color:var(--text-3);transition:color .25s}
+    .bp-icon svg{width:100%;height:100%}.bp-card:hover .bp-icon{color:var(--bp-color)}.bp-card.selected .bp-icon{color:var(--bp-color)}
+    .bp-name{font-size:13px;font-weight:500;color:var(--text-2);transition:color .25s}.bp-card.selected .bp-name{color:var(--text)}
+    .exercise-section{margin-bottom:24px;animation:slideUp .3s ease}
+    .exercise-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+    .exercise-chip{padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:13px;color:var(--text-2);cursor:pointer;transition:all .2s;font-family:inherit}
+    .exercise-chip:hover{border-color:var(--accent);color:var(--text)}.exercise-chip.selected{background:var(--accent-dim);border-color:var(--accent);color:var(--accent-glow)}
+    .input-row{display:flex;gap:10px;align-items:center}
+    .text-input{flex:1;height:44px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 14px;font-size:14px;color:var(--text);font-family:inherit;outline:none;transition:border-color .2s}
+    .text-input:focus{border-color:var(--accent)}.text-input::placeholder{color:var(--text-3)}
+    .sets-section{margin-bottom:24px;animation:slideUp .35s ease}
+    .set-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;animation:popIn .2s ease}
+    .set-number{width:32px;height:32px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:12px;color:var(--text-2);flex-shrink:0}
+    .set-inputs{flex:1;display:flex;gap:8px;align-items:center}
+    .num-input{width:0;flex:1;height:44px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 12px;font-size:16px;font-family:'Space Mono',monospace;color:var(--text);text-align:center;outline:none;transition:border-color .2s;-moz-appearance:textfield}
+    .num-input::-webkit-outer-spin-button,.num-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+    .num-input:focus{border-color:var(--accent)}
+    .set-unit{font-size:12px;color:var(--text-3);width:24px;flex-shrink:0}
+    .set-x{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--text-3);flex-shrink:0}
+    .set-delete{width:32px;height:32px;border-radius:var(--radius-xs);border:none;background:transparent;color:var(--text-3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+    .set-delete:hover{background:var(--danger-dim);color:var(--danger)}
+    .add-set-btn{width:100%;height:42px;background:var(--surface);border:1.5px dashed var(--border);border-radius:var(--radius-sm);color:var(--text-3);font-size:13px;font-family:inherit;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+    .add-set-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .save-btn{width:100%;height:50px;background:linear-gradient(135deg,var(--accent),#C48A15);border:none;border-radius:var(--radius);font-size:15px;font-weight:700;font-family:inherit;color:#0A0A0C;cursor:pointer;transition:all .25s;letter-spacing:1px;position:relative;overflow:hidden}
+    .save-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,.15));opacity:0;transition:opacity .25s}
+    .save-btn:hover::before{opacity:1}.save-btn:active{transform:scale(.98)}.save-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .today-log{margin-top:30px;padding-top:24px;border-top:1px solid var(--border)}
+    .log-empty{text-align:center;padding:30px;color:var(--text-3);font-size:13px}
+    .log-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;animation:slideUp .25s ease}
+    .log-item-color{width:4px;height:36px;border-radius:2px;flex-shrink:0}.log-item-info{flex:1}
+    .log-item-exercise{font-size:14px;font-weight:500;margin-bottom:3px}
+    .log-item-detail{font-size:12px;font-family:'Space Mono',monospace;color:var(--text-2)}
+    .log-item-delete{padding:6px;border:none;background:none;color:var(--text-3);cursor:pointer;font-size:14px;border-radius:var(--radius-xs);transition:all .2s}
+    .log-item-delete:hover{color:var(--danger);background:var(--danger-dim)}
+    .date-row{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+    .date-label{font-size:13px;color:var(--text-2);flex-shrink:0}
+    .date-input{flex:1;height:40px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 12px;font-family:'Space Mono',monospace;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;color-scheme:dark}
+    .date-input:focus{border-color:var(--accent)}
+    .history-filters{display:flex;gap:8px;overflow-x:auto;margin-bottom:20px;padding-bottom:4px;-ms-overflow-style:none;scrollbar-width:none}
+    .history-filters::-webkit-scrollbar{display:none}
+    .filter-chip{padding:8px 16px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:13px;color:var(--text-2);cursor:pointer;transition:all .2s;white-space:nowrap;font-family:inherit;flex-shrink:0;display:flex;align-items:center;gap:6px}
+    .filter-chip:hover{border-color:var(--text-2)}.filter-chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent-glow)}
+    .filter-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .history-group{margin-bottom:24px;animation:fadeIn .3s ease}
+    .history-date{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-3);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+    .history-date::after{content:'';flex:1;height:1px;background:var(--border)}
+    .history-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;position:relative;transition:all .2s}
+    .history-card:hover{border-color:var(--surface-3)}
+    .history-card-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+    .history-bp-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .history-exercise{font-size:14px;font-weight:500;flex:1}
+    .history-pr-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--success-dim);color:var(--success);letter-spacing:1px;animation:prGlow 2s ease-in-out infinite}
+    .history-sets{display:flex;flex-wrap:wrap;gap:6px}
+    .history-set-tag{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-2);background:var(--surface-2);padding:4px 10px;border-radius:var(--radius-xs)}
+    .history-card-actions{position:absolute;top:12px;right:12px}
+    .history-del-btn{border:none;background:none;color:var(--text-3);cursor:pointer;padding:4px;font-size:14px;border-radius:var(--radius-xs);transition:all .2s}
+    .history-del-btn:hover{color:var(--danger);background:var(--danger-dim)}
+    .history-empty{text-align:center;padding:60px 20px;color:var(--text-3)}
+    .trend-selector{margin-bottom:20px}
+    .trend-select{width:100%;height:44px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 14px;font-size:14px;color:var(--text);font-family:inherit;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='%239999AA'%3E%3Cpath d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;cursor:pointer;transition:border-color .2s}
+    .trend-select:focus{border-color:var(--accent)}
+    .chart-container{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 16px;margin-bottom:20px;position:relative}
+    .chart-wrapper{position:relative;width:100%;aspect-ratio:1.75;min-height:180px;max-height:280px}
+    .chart-title{font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;font-weight:500}
+    .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+    .stat-value{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--accent);margin-bottom:4px}
+    .stat-value.positive{color:var(--success)}.stat-value.negative{color:var(--danger)}
+    .stat-label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px}
+    .trend-empty{text-align:center;padding:60px 20px;color:var(--text-3)}
+    .pr-list{margin-top:4px}
+    .pr-item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}.pr-item:last-child{border-bottom:none}
+    .pr-badge{width:28px;height:28px;border-radius:50%;background:var(--success-dim);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+    .pr-info{flex:1}.pr-weight{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--text)}.pr-date{font-size:12px;color:var(--text-3)}
+    /* Summary */
+    .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:24px;overflow:hidden;animation:slideUp .35s ease}
+    .summary-header{display:flex;align-items:center;gap:14px;padding:18px 18px 14px;border-bottom:1px solid var(--border)}
+    .summary-status-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .summary-status-icon.up{background:var(--success-dim)}.summary-status-icon.stable{background:var(--accent-dim)}.summary-status-icon.down{background:var(--danger-dim)}.summary-status-icon.new{background:var(--info-dim)}
+    .summary-status-text{flex:1}.summary-status-label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+    .summary-status-value{font-size:16px;font-weight:700}
+    .summary-status-value.up{color:var(--success)}.summary-status-value.stable{color:var(--accent)}.summary-status-value.down{color:var(--danger)}.summary-status-value.new{color:var(--info)}
+    .summary-metrics{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border)}
+    .summary-metric{padding:14px 8px;text-align:center;border-right:1px solid var(--border)}.summary-metric:last-child{border-right:none}
+    .summary-metric-value{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--text);margin-bottom:2px}
+    .summary-metric-label{font-size:10px;color:var(--text-3);letter-spacing:.5px}
+    .summary-metric-sub{font-size:10px;color:var(--text-3);margin-top:1px}.summary-metric-sub.up{color:var(--success)}.summary-metric-sub.down{color:var(--danger)}
+    .summary-coverage{padding:14px 18px;border-bottom:1px solid var(--border)}
+    .summary-coverage-title{font-size:11px;color:var(--text-3);margin-bottom:10px;letter-spacing:.5px}
+    .coverage-bars{display:flex;flex-direction:column;gap:6px}
+    .coverage-row{display:flex;align-items:center;gap:8px}
+    .coverage-label{font-size:11px;color:var(--text-2);width:28px;text-align:right;flex-shrink:0}
+    .coverage-bar-bg{flex:1;height:6px;background:var(--surface-3);border-radius:3px;overflow:hidden}
+    .coverage-bar-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.34,1.56,.64,1)}
+    .coverage-count{font-size:10px;color:var(--text-3);width:20px;font-family:'Space Mono',monospace}
+    .summary-assessment{padding:14px 18px;border-bottom:1px solid var(--border)}
+    .assessment-text{font-size:13px;line-height:1.75;color:var(--text-2)}
+    .assessment-text strong{color:var(--text);font-weight:500}
+    .assessment-text .hl-up{color:var(--success);font-weight:500}
+    .assessment-text .hl-down{color:var(--danger);font-weight:500}
+    .assessment-text .hl-warn{color:var(--warning);font-weight:500}
+    .summary-insights{padding:14px 18px}
+    .summary-insights-title{font-size:11px;color:var(--text-3);margin-bottom:10px;letter-spacing:.5px}
+    .insight-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;font-size:13px;line-height:1.5;color:var(--text-2)}
+    .insight-item+.insight-item{border-top:1px solid rgba(255,255,255,.03)}
+    .insight-icon{flex-shrink:0;width:20px;text-align:center;font-size:14px}.insight-text{flex:1}
+    .summary-empty{padding:40px 20px;text-align:center;color:var(--text-3);font-size:13px;line-height:1.8}
+    /* Guide / Encyclopedia */
+    .guide-filters{display:flex;gap:8px;overflow-x:auto;margin-bottom:20px;padding-bottom:4px;scrollbar-width:none}
+    .guide-filters::-webkit-scrollbar{display:none}
+    .guide-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;animation:slideUp .3s ease}
+    .guide-card-header{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;transition:background .2s}
+    .guide-card-header:hover{background:var(--surface-2)}
+    .guide-card-color{width:4px;height:32px;border-radius:2px;flex-shrink:0}
+    .guide-card-title{flex:1}
+    .guide-card-name{font-size:14px;font-weight:500}
+    .guide-card-aka{font-size:11px;color:var(--text-3);margin-top:1px}
+    .guide-card-diff{display:flex;gap:2px;flex-shrink:0}
+    .guide-diff-dot{width:6px;height:6px;border-radius:50%;background:var(--border)}
+    .guide-diff-dot.active{background:var(--accent)}
+    .guide-diff-label{font-size:10px;color:var(--text-3);margin-left:4px}
+    .guide-badge-mine{font-size:10px;padding:2px 6px;border-radius:10px;background:var(--accent-dim);color:var(--accent);margin-left:6px}
+    .guide-card-arrow{color:var(--text-3);font-size:14px;transition:transform .25s;flex-shrink:0;margin-left:4px}
+    .guide-card.open .guide-card-arrow{transform:rotate(90deg)}
+    .guide-card-body{display:none;padding:0 16px 16px;animation:fadeIn .25s ease}
+    .guide-card.open .guide-card-body{display:block}
+    .guide-muscles{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+    .muscle-tag{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500}
+    .muscle-tag.primary{background:rgba(var(--bp-rgb),.2);color:var(--bp-color)}
+    .muscle-tag.secondary{background:var(--surface-3);color:var(--text-2)}
+    .guide-diagram{background:var(--surface-2);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+    .guide-diagram svg{width:80px;height:80px;flex-shrink:0}
+    .guide-poses{flex:1;display:flex;flex-direction:column;gap:8px}
+    .guide-pose{display:flex;align-items:flex-start;gap:8px}
+    .pose-badge{width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .pose-badge.start{background:var(--surface-3);color:var(--text-2)}
+    .pose-badge.end{background:var(--accent-dim);color:var(--accent)}
+    .pose-text{font-size:12px;line-height:1.5;color:var(--text-2)}
+    .guide-sub{font-size:12px;font-weight:700;color:var(--text-2);margin:12px 0 8px;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+    .guide-sub::before{content:'';width:2px;height:12px;border-radius:1px}
+    .guide-sub.tips::before{background:var(--success)}.guide-sub.warn::before{background:var(--danger)}
+    .guide-steps{list-style:none;counter-reset:step}
+    .guide-steps li{counter-increment:step;display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:13px;line-height:1.6;color:var(--text-2)}
+    .guide-steps li::before{content:counter(step);width:22px;height:22px;border-radius:50%;background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'Space Mono',monospace;color:var(--text-2);flex-shrink:0;margin-top:1px}
+    .guide-tips{list-style:none}
+    .guide-tips li{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:13px;line-height:1.5;color:var(--text-2)}
+    .guide-tips li::before{flex-shrink:0;font-size:12px;margin-top:2px}
+    .guide-tips.do li::before{content:'✓';color:var(--success)}
+    .guide-tips.dont li::before{content:'✗';color:var(--danger)}
+    .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--surface-2);border:1px solid var(--success);color:var(--success);padding:12px 24px;border-radius:var(--radius);font-size:14px;font-weight:500;z-index:200;transition:transform .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+    .toast.show{transform:translateX(-50%) translateY(0)}
+    @media(min-width:481px){#app{border-left:1px solid var(--border);border-right:1px solid var(--border)}}
+  </style>
+</head>
+<body>
+<div id="app">
+  <header class="app-header">
+    <div class="app-logo">FORGE<span>锻记</span></div>
+    <div class="header-actions">
+      <button class="header-btn" onclick="exportTemplate()" title="下载Excel模板" style="font-size:13px">T</button>
+      <button class="header-btn" onclick="exportData()" title="导出数据">↓</button>
+      <button class="header-btn" onclick="triggerImport()" title="导入数据">↑</button>
+      <input type="file" id="importFile" accept=".json,.xlsx,.xls,.csv" style="display:none" onchange="importData(event)">
+    </div>
+  </header>
+  <div class="main-content">
+    <div id="view-record" class="view active">
+      <div class="date-row"><span class="date-label">📅 日期</span><input type="date" class="date-input" id="recordDate"></div>
+      <div class="section-title">BODY PART 训练部位</div>
+      <div class="body-parts" id="bodyParts"></div>
+      <div id="exerciseSection" class="exercise-section" style="display:none">
+        <div class="section-title">EXERCISE 训练动作</div>
+        <div class="exercise-suggestions" id="exerciseSuggestions"></div>
+        <div class="input-row"><input type="text" class="text-input" id="exerciseInput" placeholder="输入动作名称 或 选择上方常用动作"></div>
+      </div>
+      <div id="setsSection" class="sets-section" style="display:none">
+        <div class="section-title">SETS 组数记录</div>
+        <div id="setsList"></div>
+        <button class="add-set-btn" onclick="addSet()">+ 添加一组</button>
+      </div>
+      <div id="saveSection" style="display:none;margin-top:20px;animation:slideUp .35s ease"><button class="save-btn" onclick="saveRecord()">保存记录</button></div>
+      <div class="today-log" id="todayLog"><div class="section-title">TODAY 今日记录</div><div id="todayLogList"></div></div>
+    </div>
+    <div id="view-history" class="view">
+      <div class="section-title">HISTORY 训练历史</div>
+      <div class="history-filters" id="historyFilters"></div>
+      <div id="historyList"></div>
+    </div>
+    <div id="view-trends" class="view">
+      <div class="section-title">REPORT 训练小结</div>
+      <div id="summaryContainer"></div>
+      <div class="section-title" style="margin-top:8px">TRENDS 力量趋势</div>
+      <div class="trend-selector"><select class="trend-select" id="trendExercise" onchange="renderTrend()"><option value="">选择训练动作查看趋势</option></select></div>
+      <div id="trendContent"></div>
+    </div>
+    <div id="view-guide" class="view">
+      <div class="section-title">ENCYCLOPEDIA 动作百科</div>
+      <div class="guide-filters" id="guideFilters"></div>
+      <div id="guideList"></div>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-view="record" onclick="switchView('record')"><span class="nav-icon">✏️</span><span class="nav-label">记录</span></button>
+    <button class="nav-item" data-view="history" onclick="switchView('history')"><span class="nav-icon">📋</span><span class="nav-label">历史</span></button>
+    <button class="nav-item" data-view="trends" onclick="switchView('trends')"><span class="nav-icon">📈</span><span class="nav-label">趋势</span></button>
+    <button class="nav-item" data-view="guide" onclick="switchView('guide')"><span class="nav-icon">📖</span><span class="nav-label">百科</span></button>
+  </nav>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+const BP_SVG={
+  chest:`<svg viewBox="0 0 48 36" fill="currentColor"><path d="M23 6C17 3 8 4 5 10C2 16 5 24 12 26C16 27 20 25 23 21L24 19L25 21C28 25 32 27 36 26C43 24 46 16 43 10C40 4 31 3 25 6L24 7L23 6Z"/></svg>`,
+  shoulders:`<svg viewBox="0 0 52 36" fill="currentColor"><path d="M20 14L20 34L32 34L32 14" opacity=".15"/><ellipse cx="10" cy="16" rx="10" ry="12"/><ellipse cx="42" cy="16" rx="10" ry="12"/></svg>`,
+  back:`<svg viewBox="0 0 48 40" fill="currentColor"><path d="M10 2C6 2 3 5 4 10L8 34C9 38 12 38 14 36L20 20L24 14L28 20L34 36C36 38 39 38 40 34L44 10C45 5 42 2 38 2C34 2 30 6 26 10L24 12L22 10C18 6 14 2 10 2Z" opacity=".9"/></svg>`,
+  legs:`<svg viewBox="0 0 44 40" fill="currentColor"><path d="M8 0C6 0 4 2 4 4L3 28C3 32 5 36 7 38L12 40L16 38C17 36 18 32 17 28L14 4C14 2 12 0 10 0Z"/><path d="M34 0C32 0 30 2 30 4L27 28C27 32 28 36 30 38L34 40L38 38C40 36 41 32 41 28L40 4C40 2 38 0 36 0Z"/></svg>`,
+  arms:`<svg viewBox="0 0 44 40" fill="currentColor"><path d="M12 38L8 24C6 18 4 14 4 10C4 5 7 2 11 2C15 2 17 5 18 8L20 14L22 8C23 5 25 2 29 2C33 2 36 5 36 10C36 14 34 18 32 24L28 38C27 40 25 40 24 38L22 32L20 38C19 40 17 40 16 38Z"/></svg>`,
+  core:`<svg viewBox="0 0 34 42" fill="currentColor"><rect x="1" y="1" width="14" height="11" rx="3"/><rect x="19" y="1" width="14" height="11" rx="3"/><rect x="1.5" y="15.5" width="13.5" height="11" rx="3"/><rect x="19" y="15.5" width="13.5" height="11" rx="3"/><rect x="2.5" y="30" width="12.5" height="11" rx="3.5"/><rect x="19" y="30" width="12.5" height="11" rx="3.5"/></svg>`,
+};
+const BODY_PARTS=[
+  {id:'chest',name:'胸',color:'#FF6B6B',rgb:'255,107,107'},
+  {id:'shoulders',name:'肩',color:'#4ECDC4',rgb:'78,205,196'},
+  {id:'back',name:'背',color:'#45B7D1',rgb:'69,183,209'},
+  {id:'legs',name:'腿',color:'#F7C948',rgb:'247,201,72'},
+  {id:'arms',name:'臂',color:'#BB8FCE',rgb:'187,143,206'},
+  {id:'core',name:'核心',color:'#82E0AA',rgb:'130,224,170'},
+];
+const DEFAULT_EXERCISES={
+  chest:['卧推','上斜卧推','下斜卧推','哑铃飞鸟','龙门架夹胸','器械推胸'],
+  shoulders:['杠铃推举','哑铃推举','侧平举','前平举','面拉','反向飞鸟'],
+  back:['引体向上','高位下拉','杠铃划船','哑铃划船','坐姿划船','硬拉'],
+  legs:['深蹲','哈克深蹲','腿举','腿弯举','腿屈伸','罗马尼亚硬拉','臀推','保加利亚分腿蹲'],
+  arms:['杠铃弯举','哑铃弯举','锤式弯举','三头下压','碎颅者','法式弯举'],
+  core:['卷腹','悬垂举腿','俄罗斯转体','平板支撑','腹肌轮'],
+};
+
+const EXERCISE_GUIDE={
+  chest:[
+    {name:'卧推',aka:'Bench Press',diff:2,primary:['胸大肌中束'],secondary:['前三角肌','三头肌'],
+     start:'仰卧平板凳，杠铃在胸部正上方，双臂伸直',end:'杠铃下放至乳头水平，轻触胸部后推起',
+     steps:['仰卧平板凳，双脚踏实地面，臀部、上背、头部贴紧凳面','双手正握杠铃，握距约1.5倍肩宽，手腕保持中立','肩胛骨向后收紧并下沉，胸部微微挺起形成自然弓背','杠铃下放至乳头水平线，大臂与躯干成约45-75°夹角','发力推起杠铃至起始位置，呼气，手肘不要完全锁死'],
+     tips:['肩胛骨始终收紧下沉，想象"把肩胛骨塞进后裤兜"','下放速度慢于推起速度，约2秒下放、1秒推起','双脚用力蹬地，形成腿部驱动传导力量'],
+     mistakes:['肩膀前伸失去肩胛骨收紧——最常见的受伤原因','杠铃弹胸借力，胸口应仅轻触','手腕过度后仰，应保持与前臂一条直线'],
+     svg:`<svg viewBox="0 0 140 70" fill="none"><rect x="12" y="38" width="55" height="3" rx="1.5" fill="#2A2A36"/><rect x="32" y="38" width="3" height="16" fill="#2A2A36" rx="1"/><g stroke="#888" stroke-width="2.2" stroke-linecap="round"><circle cx="62" cy="32" r="4" fill="#888"/><line x1="58" y1="34" x2="32" y2="38"/><line x1="42" y1="36" x2="42" y2="12"/><line x1="32" y1="38" x2="24" y2="52"/><line x1="24" y1="52" x2="22" y2="60"/></g><line x1="30" y1="12" x2="54" y2="12" stroke="#666" stroke-width="2.5" stroke-linecap="round"/><circle cx="28" cy="12" r="3.5" stroke="#666" stroke-width="1.5"/><circle cx="56" cy="12" r="3.5" stroke="#666" stroke-width="1.5"/><ellipse cx="42" cy="34" rx="7" ry="5" fill="#FF6B6B" opacity=".2"/><path d="M90 36 C92 36 95 18 92 14" stroke="#D49A1E" stroke-width="1.2"/><polygon points="91,12 93,16 89,15" fill="#D49A1E"/><text x="97" y="26" fill="#5C5C6E" font-size="7" font-family="Noto Sans SC">推举方向</text></svg>`},
+    {name:'上斜卧推',aka:'Incline Press',diff:2,primary:['胸大肌上束'],secondary:['前三角肌','三头肌'],
+     start:'斜板凳30-45°角，杠铃在锁骨上方',end:'杠铃下放至上胸后推起',
+     steps:['调整斜板凳角度为30-45°，角度越大三角肌参与越多','握距与平板卧推相同或略窄，取出杠铃','下放至锁骨下方2-3厘米处','保持肩胛骨收紧，推起至起始位置'],
+     tips:['角度不宜超过45°，否则变成肩推','下放位置比平板卧推略高，在锁骨至乳头之间','保持核心收紧，腰部不要过度反弓'],
+     mistakes:['角度过大(>60°)，上胸刺激减少','下放位置过低，与平板卧推混淆','臀部离开凳面']},
+    {name:'哑铃飞鸟',aka:'Dumbbell Fly',diff:2,primary:['胸大肌'],secondary:['前三角肌'],
+     start:'仰卧持哑铃，双臂伸直在胸部正上方',end:'双臂向两侧打开至胸部拉伸感明显',
+     steps:['仰卧平板凳，双手各持一只哑铃，掌心相对','双臂微曲（约15-20°肘角），缓慢向两侧打开','下放至上臂与地面平行或略低于肩平面','用胸肌发力"夹"回起始位置，想象双臂环抱大树'],
+     tips:['全程保持肘部微曲角度不变，像固定的弧线运动','专注于胸肌的拉伸和收缩感，不要用手臂力量','使用较轻重量，飞鸟是孤立动作不适合大重量'],
+     mistakes:['肘部伸直变成直臂运动——肩关节压力剧增','下放过深超过肩平面——容易拉伤','速度过快缺乏控制']},
+    {name:'龙门架夹胸',aka:'Cable Crossover',diff:1,primary:['胸大肌'],secondary:['前三角肌'],
+     start:'站立于龙门架中央，双手握把手',end:'双手在身前交叉夹紧',
+     steps:['站在龙门架中央，滑轮设置在高位','双手握住把手，身体微微前倾','保持肘部微曲，双手向下、向前弧形运动','在胸前交叉双手，挤压胸肌1-2秒后缓慢回放'],
+     tips:['调整滑轮高度可改变刺激角度：高位→下胸，中位→中胸，低位→上胸','动作末端挤压停顿是关键，最大化胸肌收缩','控制回放速度，充分拉伸胸肌'],
+     mistakes:['用手臂拉动而非胸肌主导发力','身体过度前倾用体重借力','回放阶段完全放松失去张力']},
+  ],
+  shoulders:[
+    {name:'杠铃推举',aka:'Overhead Press',diff:3,primary:['三角肌前束','三角肌中束'],secondary:['三头肌','斜方肌上部'],
+     start:'杠铃在锁骨前方，双手略宽于肩',end:'将杠铃推过头顶至手臂伸直',
+     steps:['站立，双脚与肩同宽，杠铃架在锁骨前方','核心绷紧，臀部夹紧，形成稳固的下半身支撑','将杠铃垂直向上推，过头时头部微微前移让出路径','手臂完全伸直，杠铃在头部正上方（耳朵后方）','缓慢下放回锁骨位置'],
+     tips:['推举路径应尽量垂直，杠铃不要向前推','挤紧臀部防止腰部过度后仰','握距过宽肩关节压力大，略宽于肩即可'],
+     mistakes:['腰部过度反弓代偿——最常见错误，长期导致腰伤','推举路径呈弧形而非直线，浪费力量','手腕后折，应保持中立'],
+     svg:`<svg viewBox="0 0 140 75" fill="none"><g stroke="#666" stroke-width="2.2" stroke-linecap="round"><circle cx="35" cy="18" r="4" fill="#666"/><line x1="35" y1="22" x2="35" y2="44"/><line x1="35" y1="28" x2="26" y2="36"/><line x1="26" y1="36" x2="28" y2="28"/><line x1="35" y1="28" x2="44" y2="36"/><line x1="44" y1="36" x2="42" y2="28"/><line x1="35" y1="44" x2="28" y2="62"/><line x1="28" y1="62" x2="26" y2="72"/><line x1="35" y1="44" x2="42" y2="62"/><line x1="42" y1="62" x2="44" y2="72"/></g><line x1="20" y1="28" x2="50" y2="28" stroke="#555" stroke-width="2" stroke-linecap="round"/><g stroke="#999" stroke-width="2.2" stroke-linecap="round"><circle cx="105" cy="18" r="4" fill="#999"/><line x1="105" y1="22" x2="105" y2="44"/><line x1="105" y1="28" x2="96" y2="24"/><line x1="96" y1="24" x2="96" y2="8"/><line x1="105" y1="28" x2="114" y2="24"/><line x1="114" y1="24" x2="114" y2="8"/><line x1="105" y1="44" x2="98" y2="62"/><line x1="98" y1="62" x2="96" y2="72"/><line x1="105" y1="44" x2="112" y2="62"/><line x1="112" y1="62" x2="114" y2="72"/></g><line x1="88" y1="8" x2="122" y2="8" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><circle cx="86" cy="8" r="3" stroke="#888" stroke-width="1.5"/><circle cx="124" cy="8" r="3" stroke="#888" stroke-width="1.5"/><ellipse cx="105" cy="26" rx="8" ry="5" fill="#4ECDC4" opacity=".2"/><path d="M65 36 Q72 28 78 36" stroke="#D49A1E" stroke-width="1.2"/><polygon points="80,34 77,38 76,33" fill="#D49A1E"/></svg>`},
+    {name:'侧平举',aka:'Lateral Raise',diff:1,primary:['三角肌中束'],secondary:['斜方肌上部'],
+     start:'站立持哑铃于体侧',end:'双臂侧举至与地面平行',
+     steps:['站立，双手持哑铃于体侧，掌心朝向身体','微微前倾5-10°，肘部保持轻微弯曲','以肩关节为轴心，双臂向两侧抬起至与地面平行','短暂停顿，缓慢下放，不要让哑铃完全贴回体侧'],
+     tips:['想象"倒水"——小指略高于拇指，增加中束刺激','不要耸肩！保持肩胛骨下沉','使用较轻重量，12-20次为宜，感受中束发力'],
+     mistakes:['耸肩发力——斜方肌代偿，中束刺激不足','甩臂借力——应全程匀速控制','抬得太高超过肩平面——斜方肌过多参与']},
+    {name:'面拉',aka:'Face Pull',diff:1,primary:['三角肌后束','菱形肌'],secondary:['斜方肌中下部'],
+     start:'站立面对龙门架高位滑轮',end:'绳索拉至面部两侧，肘部外展',
+     steps:['龙门架滑轮设在面部高度，使用绳索附件','双手握绳索末端，掌心相对，后退两步','双肘向外展开，将绳索拉向面部两侧','肩胛骨充分收紧，大臂与地面平行时停顿','缓慢回放，保持肩胛骨的控制'],
+     tips:['这是"拉到脸"不是"拉到胸"，肘部要高于手部','外旋——拉到末端时手背朝天花板，激活外旋肌群','重量不必大，专注肩后束和肩胛骨的挤压感'],
+     mistakes:['变成高位划船——肘部太低，拉到胸口','耸肩代偿——保持肩膀下沉远离耳朵','身体过度后仰借力']},
+  ],
+  back:[
+    {name:'引体向上',aka:'Pull-up',diff:3,primary:['背阔肌','大圆肌'],secondary:['肱二头肌','菱形肌'],
+     start:'双手正握单杠悬垂，手臂伸直',end:'下巴越过单杠高度',
+     steps:['双手正握（掌心朝前）单杠，握距略宽于肩','肩胛骨先下沉收紧（"把肩膀从耳朵拉开"）','用背部力量拉起身体，肘部向下、向后驱动','下巴越过单杠或胸部接近单杠时短暂停顿','缓慢下放至手臂完全伸直，重复'],
+     tips:['先启动肩胛骨下沉，再弯曲手臂——这是激活背肌的关键','想象"肘部往屁股方向拉"，而不是"手往上拉"','宽握更侧重背阔肌宽度，窄握更侧重背阔肌厚度'],
+     mistakes:['只用手臂拉——没有肩胛骨启动，二头肌代偿','半程动作——没有完全伸直手臂（底部）或拉够高度（顶部）','身体过度摆荡借力'],
+     svg:`<svg viewBox="0 0 140 78" fill="none"><line x1="5" y1="4" x2="135" y2="4" stroke="#2A2A36" stroke-width="3" stroke-linecap="round"/><g stroke="#666" stroke-width="2.2" stroke-linecap="round"><circle cx="35" cy="22" r="4" fill="#666"/><line x1="35" y1="26" x2="35" y2="48"/><line x1="35" y1="30" x2="28" y2="8"/><line x1="35" y1="30" x2="42" y2="8"/><line x1="35" y1="48" x2="30" y2="62"/><line x1="30" y1="62" x2="28" y2="72"/><line x1="35" y1="48" x2="40" y2="62"/><line x1="40" y1="62" x2="42" y2="72"/></g><g stroke="#999" stroke-width="2.2" stroke-linecap="round"><circle cx="105" cy="12" r="4" fill="#999"/><line x1="105" y1="16" x2="105" y2="38"/><line x1="105" y1="20" x2="98" y2="8"/><line x1="105" y1="20" x2="112" y2="8"/><line x1="105" y1="38" x2="100" y2="52"/><line x1="100" y1="52" x2="98" y2="60"/><line x1="105" y1="38" x2="110" y2="52"/><line x1="110" y1="52" x2="112" y2="60"/></g><ellipse cx="105" cy="28" rx="8" ry="10" fill="#45B7D1" opacity=".15"/><path d="M62 38 Q70 30 76 38" stroke="#D49A1E" stroke-width="1.2"/><polygon points="78,36 75,40 74,35" fill="#D49A1E"/></svg>`},
+    {name:'杠铃划船',aka:'Barbell Row',diff:2,primary:['背阔肌','菱形肌'],secondary:['斜方肌','后三角肌','肱二头肌'],
+     start:'俯身约45°，杠铃在膝盖下方自然悬垂',end:'杠铃拉至下腹部，肩胛骨完全收紧',
+     steps:['站立持杠铃，双脚与肩同宽，屈髋俯身至上身约45°','膝盖微曲，腰背挺直（中立位），杠铃自然悬垂','肩胛骨发力收紧，肘部向后拉，将杠铃拉向下腹部','顶端肩胛骨充分内收挤压，停顿1秒','缓慢下放至手臂伸直'],
+     tips:['全程保持腰背挺直——圆背是最大的受伤风险','拉至"肚脐"位置刺激背阔肌下部，拉至"胸骨"更刺激上背','动作全程收紧核心，下背不要成为薄弱环节'],
+     mistakes:['圆背弓腰——椎间盘压力剧增','用手臂"拽"而非背部"拉"——起始缺少肩胛骨启动','上身角度过大（几乎站直）变成耸肩划船']},
+    {name:'硬拉',aka:'Deadlift',diff:3,primary:['竖脊肌','臀大肌','腘绳肌'],secondary:['斜方肌','前臂','核心'],
+     start:'杠铃在地面，俯身双手握杠',end:'身体完全直立，髋关节锁定',
+     steps:['双脚与髋同宽站在杠铃前，杠铃在脚掌中心正上方','屈髋屈膝，双手在膝盖外侧握杠，正反握或正握','挺胸收腹，背部挺直，肩胛骨微微收紧','双脚蹬地站起，杠铃紧贴身体上移，髋膝同步伸展','站直后髋关节前推锁定，不要过度后仰'],
+     tips:['杠铃始终紧贴身体——离身体越远，腰部负荷越大','起始阶段"蹬地"而非"拉"，想象把地面推开','呼吸法：拉起前深吸一口气，腹部绷紧（瓦尔萨尔瓦），站直后呼气'],
+     mistakes:['圆背——最危险的错误，极易导致腰椎损伤','杠铃离开身体——变成"早安式"，腰部压力剧增','起始髋位过高（变成直腿硬拉）或过低（变成深蹲）'],
+     svg:`<svg viewBox="0 0 140 78" fill="none"><line x1="8" y1="70" x2="60" y2="70" stroke="#555" stroke-width="2.5" stroke-linecap="round"/><circle cx="6" cy="70" r="3" stroke="#555" stroke-width="1.5"/><circle cx="62" cy="70" r="3" stroke="#555" stroke-width="1.5"/><g stroke="#666" stroke-width="2.2" stroke-linecap="round"><circle cx="42" cy="22" r="4" fill="#666"/><line x1="40" y1="25" x2="32" y2="48"/><line x1="36" y1="36" x2="28" y2="50"/><line x1="28" y1="50" x2="26" y2="64"/><line x1="36" y1="36" x2="42" y2="50"/><line x1="42" y1="50" x2="40" y2="64"/><line x1="32" y1="48" x2="22" y2="56"/><line x1="22" y1="56" x2="18" y2="68"/><line x1="32" y1="48" x2="38" y2="58"/><line x1="38" y1="58" x2="42" y2="68"/></g><g stroke="#999" stroke-width="2.2" stroke-linecap="round"><circle cx="105" cy="14" r="4" fill="#999"/><line x1="105" y1="18" x2="105" y2="42"/><line x1="105" y1="24" x2="98" y2="36"/><line x1="98" y1="36" x2="98" y2="42"/><line x1="105" y1="24" x2="112" y2="36"/><line x1="112" y1="36" x2="112" y2="42"/><line x1="105" y1="42" x2="99" y2="58"/><line x1="99" y1="58" x2="97" y2="68"/><line x1="105" y1="42" x2="111" y2="58"/><line x1="111" y1="58" x2="113" y2="68"/></g><line x1="90" y1="42" x2="122" y2="42" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="105" cy="36" rx="6" ry="12" fill="#45B7D1" opacity=".15"/><path d="M65 42 Q72 34 78 42" stroke="#D49A1E" stroke-width="1.2"/><polygon points="80,40 77,44 76,39" fill="#D49A1E"/></svg>`},
+  ],
+  legs:[
+    {name:'深蹲',aka:'Barbell Squat',diff:3,primary:['股四头肌','臀大肌'],secondary:['腘绳肌','竖脊肌','核心'],
+     start:'杠铃置于上背斜方肌上，站直',end:'下蹲至大腿平行或低于地面',
+     steps:['杠铃放在上背斜方肌（高杠位）或后三角肌（低杠位），双脚与肩同宽或略宽','挺胸收腹，核心绷紧，双眼平视前方','屈髋屈膝同步下蹲，膝盖方向与脚尖一致','下蹲至大腿至少与地面平行（"蹲到平行"），髋关节低于膝关节','脚跟发力蹬地站起，髋膝同步伸展至完全站直'],
+     tips:['重心始终在脚掌中后部，脚跟绝不能离地','膝盖可以超过脚尖——这是自然的，关键是膝盖沿脚尖方向','下蹲到底部短暂停顿（暂停深蹲）可增强底部力量'],
+     mistakes:['膝盖内扣——最常见错误，训练时有意识地"膝盖推向脚尖方向"','圆背——失去脊柱中立位，核心要始终紧绷','重心前移脚跟离地——深蹲鞋或脚跟垫片可辅助'],
+     svg:`<svg viewBox="0 0 140 78" fill="none"><g stroke="#666" stroke-width="2.2" stroke-linecap="round"><circle cx="35" cy="10" r="4" fill="#666"/><line x1="35" y1="14" x2="35" y2="40"/><line x1="35" y1="22" x2="28" y2="30"/><line x1="28" y1="30" x2="30" y2="22"/><line x1="35" y1="22" x2="42" y2="30"/><line x1="42" y1="30" x2="40" y2="22"/><line x1="35" y1="40" x2="35" y2="56"/><line x1="35" y1="56" x2="35" y2="72"/></g><line x1="23" y1="22" x2="47" y2="22" stroke="#555" stroke-width="2" stroke-linecap="round"/><g stroke="#999" stroke-width="2.2" stroke-linecap="round"><circle cx="108" cy="24" r="4" fill="#999"/><line x1="108" y1="28" x2="106" y2="50"/><line x1="108" y1="34" x2="100" y2="40"/><line x1="100" y1="40" x2="103" y2="48"/><line x1="108" y1="34" x2="116" y2="40"/><line x1="116" y1="40" x2="113" y2="48"/><line x1="106" y1="50" x2="96" y2="62"/><line x1="96" y1="62" x2="98" y2="72"/><line x1="106" y1="50" x2="116" y2="62"/><line x1="116" y1="62" x2="118" y2="72"/></g><line x1="96" y1="34" x2="120" y2="34" stroke="#888" stroke-width="2" stroke-linecap="round"/><ellipse cx="106" cy="56" rx="8" ry="9" fill="#F7C948" opacity=".2"/><path d="M58 40 Q66 32 72 40" stroke="#D49A1E" stroke-width="1.2"/><polygon points="74,38 71,42 70,37" fill="#D49A1E"/></svg>`},
+    {name:'哈克深蹲',aka:'Hack Squat',diff:2,primary:['股四头肌'],secondary:['臀大肌'],
+     start:'背靠哈克深蹲机垫板，双脚在踏板上',end:'下蹲至大腿平行地面后推起',
+     steps:['背部紧贴哈克深蹲机靠垫，双肩扛住肩垫','双脚放在踏板中央，与肩同宽','解锁安全栓，缓慢屈膝下蹲','下蹲至大腿与踏板约成90°，膝关节不要锁死','发力推起至起始位置，全程背部不离开靠垫'],
+     tips:['脚在踏板上的位置决定刺激重点：低位→股四，高位→臀部和腘绳肌','膝盖方向始终与脚尖一致','相比自由深蹲更安全，适合冲击大重量'],
+     mistakes:['膝盖内扣——和自由深蹲同样需注意','背部离开靠垫——失去机器的支撑优势','速度过快，在底部弹起——应有控制']},
+    {name:'腿举',aka:'Leg Press',diff:1,primary:['股四头肌','臀大肌'],secondary:['腘绳肌'],
+     start:'坐在腿举机上，双脚在踏板上',end:'屈膝下放至90°后推起',
+     steps:['调整座椅靠背，坐好后腰部紧贴靠背','双脚放在踏板上与肩同宽，解锁安全栓','缓慢屈膝，下放踏板至膝关节约90°','脚跟发力推起，膝盖不要完全锁死','完成组数后重新锁好安全栓'],
+     tips:['下放幅度不宜过大——腰部离开靠背说明过深了','双脚位置：高位更练臀，低位更练股四','这是安全地上大重量训练腿部的好选择'],
+     mistakes:['膝盖完全锁死——关节压力极大','腰部弓起离开靠背——控制下放幅度','只做半程动作——至少到90°']},
+    {name:'罗马尼亚硬拉',aka:'Romanian Deadlift',diff:2,primary:['腘绳肌','臀大肌'],secondary:['竖脊肌'],
+     start:'站直持杠铃在大腿前方',end:'屈髋前倾至腘绳肌充分拉伸',
+     steps:['站直，双手正握杠铃在大腿前方，双脚与髋同宽','保持膝盖微曲（角度固定不变），以髋关节为轴心前倾','杠铃紧贴大腿下滑，下放至胫骨中段或感到腘绳肌充分拉伸','臀部发力，髋关节前推至站直'],
+     tips:['这不是"弯腰"，是"屈髋"——想象臀部往后坐','全程杠铃紧贴身体，不要让杠铃远离','感受腘绳肌的拉伸——如果拉伸感不明显，检查膝盖是否弯太多'],
+     mistakes:['弯曲膝盖太多变成传统硬拉','圆背——始终保持脊柱中立','杠铃远离身体——增加腰部负荷']},
+  ],
+  arms:[
+    {name:'杠铃弯举',aka:'Barbell Curl',diff:1,primary:['肱二头肌'],secondary:['肱肌','前臂'],
+     start:'站立持杠铃在大腿前方，手臂伸直',end:'弯曲至上臂完全收缩',
+     steps:['站立，双手反握杠铃（掌心朝上），握距与肩同宽','大臂紧贴身体两侧，保持固定不动','仅通过屈肘将杠铃向上弯举至肩部高度','在顶端挤压二头肌1秒','缓慢下放至手臂完全伸直'],
+     tips:['大臂始终固定——如果大臂前移，三角肌前束就会代偿','使用EZ杠可减轻手腕压力','离心阶段（下放）慢速控制效果更好'],
+     mistakes:['身体前后摆动借力——减轻重量，严格控制','大臂过度前移——变成前平举','手腕后折——保持中立或微微内扣']},
+    {name:'三头下压',aka:'Tricep Pushdown',diff:1,primary:['三头肌'],secondary:[],
+     start:'站立面对龙门架，双手握V把在胸前',end:'将绳索下压至手臂完全伸直',
+     steps:['龙门架高位滑轮，安装V把或直杆','双手握住附件，大臂夹紧身体两侧','仅通过伸展肘关节，将附件下压至手臂伸直','在底端挤压三头肌，然后缓慢回放至前臂约90°'],
+     tips:['大臂固定不动是关键——只有前臂在动','使用绳索附件在底端外展双手可增加长头刺激','站稳不要身体前倾借力'],
+     mistakes:['大臂前后摆动——失去孤立性','身体过度前倾用体重压——减轻重量','回放不充分（只做半程）']},
+  ],
+  core:[
+    {name:'悬垂举腿',aka:'Hanging Leg Raise',diff:2,primary:['腹直肌下部','髋屈肌'],secondary:['腹斜肌','前臂'],
+     start:'双手正握单杠悬垂',end:'双腿抬至与地面平行或更高',
+     steps:['双手正握单杠悬垂，双腿伸直自然下垂','收紧核心，双腿伸直缓慢向上抬起','抬至大腿与地面平行（难度更高可抬至杠铃高度）','缓慢下放至起始位置，避免摆荡'],
+     tips:['保持动作缓慢控制——快速摆腿完全没有效果','进阶：举腿到杠铃高度，让骨盆后倾，腹肌收缩更强','退阶：先练屈膝举腿，逐渐过渡到直腿'],
+     mistakes:['利用惯性摆荡——完全失去腹肌刺激','只抬到45°就放下——幅度不够','耸肩——肩膀保持下沉远离耳朵']},
+    {name:'平板支撑',aka:'Plank',diff:1,primary:['腹横肌','腹直肌'],secondary:['竖脊肌','三角肌'],
+     start:'俯卧撑起始位置',end:'保持身体从头到脚成一条直线',
+     steps:['双肘置于肩部正下方支撑身体，前臂平放地面','双脚并拢或与肩同宽，脚尖着地','收紧腹部、臀部和大腿，身体从头到脚成一条直线','保持正常呼吸，维持30-60秒'],
+     tips:['臀部不要翘起也不要塌腰——想象一杯水放在腰上不会洒','主动收紧腹部，想象"肚脐向脊柱方向靠拢"','30秒已经太轻松？试试单臂或单腿支撑'],
+     mistakes:['塌腰——腰椎压力大，且腹肌没有发力','臀部高翘——降低了核心难度','憋气——应保持稳定呼吸']},
+    {name:'腹肌轮',aka:'Ab Wheel Rollout',diff:3,primary:['腹直肌','腹横肌'],secondary:['背阔肌','三角肌'],
+     start:'跪姿双手握轮于肩下方',end:'身体前伸至几乎与地面平行',
+     steps:['跪在垫子上，双手握住腹肌轮置于肩部正下方','收紧核心，缓慢向前推出腹肌轮','身体尽量伸展，保持腰部不塌陷','用腹肌力量将轮子拉回至起始位置'],
+     tips:['全程保持骨盆后倾（"卷尾骨"），防止腰部过伸','初始不必推太远，逐渐增加距离','这是一个高级动作，如果腰部不适请先练平板支撑打基础'],
+     mistakes:['腰部塌陷——最大风险，立即停止并减小幅度','只用手臂拉回——应该是腹肌主导收缩','推出过远失去控制——循序渐进']},
+  ]
+};
+
+let state={records:[],selectedBodyPart:null,selectedExercise:'',sets:[{weight:'',reps:''}],historyFilter:'all',guideFilter:'all',guideFilterMine:false};
+function matchExerciseToGuide(userEx,bpId){const exs=EXERCISE_GUIDE[bpId]||[];const u=String(userEx||'').trim();if(!u)return null;const exact=exs.find(e=>e.name===u);if(exact)return exact;const inc=exs.find(e=>e.name.includes(u)||u.includes(e.name));return inc||null}
+function getDifficultyStars(d){const s=['★☆☆','★★☆','★★★'];return s[Math.min(Math.max(0,d-1),2)]||'★☆☆'}
+function loadData(){try{const s=localStorage.getItem('forge_records');if(s)state.records=JSON.parse(s)}catch(e){state.records=[]}}
+function saveData(){localStorage.setItem('forge_records',JSON.stringify(state.records))}
+function today(){return new Date().toISOString().split('T')[0]}
+function formatDate(d){const dt=new Date(d+'T00:00:00');const w=['日','一','二','三','四','五','六'];return`${dt.getMonth()+1}月${dt.getDate()}日 周${w[dt.getDay()]}`}
+function getBodyPart(id){return BODY_PARTS.find(b=>b.id===id)}
+function generateId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,5)}
+function showToast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+function daysBetween(a,b){return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000)}
+function getLast30DaysRange(){const end=today();const [ey,em,ed]=end.split('-').map(Number);const d=new Date(ey,em-1,ed);d.setDate(d.getDate()-30);const start=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');return{start,end}}
+
+function initRecordView(){
+  document.getElementById('recordDate').value=today();
+  document.getElementById('bodyParts').innerHTML=BODY_PARTS.map(bp=>`<div class="bp-card" data-bp="${bp.id}" style="--bp-color:${bp.color};--bp-rgb:${bp.rgb}" onclick="selectBodyPart('${bp.id}')"><div class="bp-icon">${BP_SVG[bp.id]}</div><span class="bp-name">${bp.name}</span></div>`).join('');
+}
+function selectBodyPart(id){state.selectedBodyPart=id;state.selectedExercise='';document.getElementById('exerciseInput').value='';document.querySelectorAll('.bp-card').forEach(e=>e.classList.toggle('selected',e.dataset.bp===id));renderExerciseSuggestions();document.getElementById('exerciseSection').style.display='block';document.getElementById('setsSection').style.display='none';document.getElementById('saveSection').style.display='none'}
+function getExercisesForBodyPart(id){const d=DEFAULT_EXERCISES[id]||[];const h=[...new Set(state.records.filter(r=>r.bodyPart===id).map(r=>r.exercise))];return[...new Set([...d,...h])]}
+function renderExerciseSuggestions(){const exs=getExercisesForBodyPart(state.selectedBodyPart);document.getElementById('exerciseSuggestions').innerHTML=exs.map(e=>`<button class="exercise-chip ${state.selectedExercise===e?'selected':''}" onclick="selectExercise('${e}')">${e}</button>`).join('')}
+function selectExercise(n){state.selectedExercise=n;document.getElementById('exerciseInput').value=n;renderExerciseSuggestions();showSetsSection()}
+document.getElementById('exerciseInput').addEventListener('input',function(){state.selectedExercise=this.value;renderExerciseSuggestions();if(this.value.trim())showSetsSection();else{document.getElementById('setsSection').style.display='none';document.getElementById('saveSection').style.display='none'}});
+function showSetsSection(){document.getElementById('setsSection').style.display='block';document.getElementById('saveSection').style.display='block';const ls=getLastSetsForExercise(state.selectedExercise);if(ls&&state.sets.length===1&&!state.sets[0].weight&&!state.sets[0].reps)state.sets=ls.map(s=>({weight:s.weight,reps:s.reps}));renderSets()}
+function getLastSetsForExercise(ex){const s=state.records.filter(r=>r.exercise===ex).sort((a,b)=>b.date.localeCompare(a.date));return s.length>0?s[0].sets:null}
+function renderSets(){document.getElementById('setsList').innerHTML=state.sets.map((s,i)=>`<div class="set-row"><div class="set-number">${i+1}</div><div class="set-inputs"><input type="number" class="num-input" placeholder="重量" value="${s.weight}" onchange="updateSet(${i},'weight',this.value)" inputmode="decimal"><span class="set-unit">kg</span><span class="set-x">×</span><input type="number" class="num-input" placeholder="次数" value="${s.reps}" onchange="updateSet(${i},'reps',this.value)" inputmode="numeric"><span class="set-unit">次</span></div><button class="set-delete" onclick="deleteSet(${i})" ${state.sets.length<=1?'style="visibility:hidden"':''}>✕</button></div>`).join('')}
+function updateSet(i,f,v){state.sets[i][f]=v?parseFloat(v):''}
+function addSet(){const l=state.sets[state.sets.length-1];state.sets.push({weight:l.weight||'',reps:l.reps||''});renderSets()}
+function deleteSet(i){if(state.sets.length>1){state.sets.splice(i,1);renderSets()}}
+function saveRecord(){const d=document.getElementById('recordDate').value,ex=state.selectedExercise.trim(),bp=state.selectedBodyPart;if(!d||!ex||!bp){showToast('请完整填写信息');return}const vs=state.sets.filter(s=>s.weight&&s.reps);if(!vs.length){showToast('请至少填写一组数据');return}state.records.push({id:generateId(),date:d,bodyPart:bp,exercise:ex,sets:vs.map(s=>({weight:Number(s.weight),reps:Number(s.reps)}))});saveData();state.selectedExercise='';state.sets=[{weight:'',reps:''}];document.getElementById('exerciseInput').value='';document.getElementById('setsSection').style.display='none';document.getElementById('saveSection').style.display='none';renderExerciseSuggestions();renderTodayLog();showToast('✓ 记录已保存')}
+function renderTodayLog(){const d=document.getElementById('recordDate').value,recs=state.records.filter(r=>r.date===d),c=document.getElementById('todayLogList');if(!recs.length){c.innerHTML='<div class="log-empty">尚无记录，开始你的训练吧</div>';return}c.innerHTML=recs.map(r=>{const bp=getBodyPart(r.bodyPart);return`<div class="log-item"><div class="log-item-color" style="background:${bp.color}"></div><div class="log-item-info"><div class="log-item-exercise">${r.exercise}</div><div class="log-item-detail">${r.sets.map(s=>`${s.weight}kg×${s.reps}`).join('  ')}</div></div><button class="log-item-delete" onclick="deleteRecord('${r.id}')">✕</button></div>`}).join('')}
+function deleteRecord(id){state.records=state.records.filter(r=>r.id!==id);saveData();renderTodayLog();renderHistory();showToast('已删除')}
+
+function renderHistory(){document.getElementById('historyFilters').innerHTML=`<button class="filter-chip ${state.historyFilter==='all'?'active':''}" onclick="setHistoryFilter('all')">全部</button>${BODY_PARTS.map(bp=>`<button class="filter-chip ${state.historyFilter===bp.id?'active':''}" onclick="setHistoryFilter('${bp.id}')"><span class="filter-dot" style="background:${bp.color}"></span>${bp.name}</button>`).join('')}`;let f=[...state.records];if(state.historyFilter!=='all')f=f.filter(r=>r.bodyPart===state.historyFilter);const g={};f.forEach(r=>{if(!g[r.date])g[r.date]=[];g[r.date].push(r)});const sd=Object.keys(g).sort((a,b)=>b.localeCompare(a)),c=document.getElementById('historyList');if(!sd.length){c.innerHTML='<div class="history-empty"><div style="font-size:40px;margin-bottom:12px;opacity:.5">📭</div><div style="font-size:14px">暂无训练记录</div></div>';return}const pm=computePRMap();c.innerHTML=sd.map(d=>`<div class="history-group"><div class="history-date">${formatDate(d)}</div>${g[d].map(r=>{const bp=getBodyPart(r.bodyPart),ip=pm[r.exercise]&&pm[r.exercise].id===r.id;return`<div class="history-card"><div class="history-card-head"><div class="history-bp-dot" style="background:${bp.color}"></div><div class="history-exercise">${r.exercise}</div>${ip?'<span class="history-pr-badge">PR</span>':''}</div><div class="history-sets">${r.sets.map(s=>`<span class="history-set-tag">${s.weight}kg × ${s.reps}</span>`).join('')}</div><div class="history-card-actions"><button class="history-del-btn" onclick="deleteRecord('${r.id}')">✕</button></div></div>`}).join('')}</div>`).join('')}
+function setHistoryFilter(f){state.historyFilter=f;renderHistory()}
+function computePRMap(){const m={};state.records.forEach(r=>{const w=Math.max(...r.sets.map(s=>s.weight));if(!m[r.exercise]||w>m[r.exercise].weight)m[r.exercise]={weight:w,id:r.id,date:r.date}});return m}
+
+function renderSummary(){
+  const c=document.getElementById('summaryContainer');
+  if(!state.records.length){c.innerHTML='<div class="summary-card"><div class="summary-empty">开始记录训练后<br>这里会显示训练小结和智能分析</div></div>';return}
+  const ts=today();const [ty,tm,td]=ts.split('-').map(Number);const tdObj=new Date(ty,tm-1,td);
+  const ws=new Date(tdObj);ws.setDate(tdObj.getDate()-tdObj.getDay()+(tdObj.getDay()===0?-6:1));
+  const lw=new Date(ws);lw.setDate(ws.getDate()-7);
+  const fmt=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const twr=state.records.filter(r=>r.date>=fmt(ws)&&r.date<=ts);
+  const lwr=state.records.filter(r=>r.date>=fmt(lw)&&r.date<fmt(ws));
+  const twd=new Set(twr.map(r=>r.date)).size,lwd=new Set(lwr.map(r=>r.date)).size,wd=twd-lwd;
+  const r30=getLast30DaysRange();
+  const l30=state.records.filter(r=>r.date>=r30.start&&r.date<=r30.end);
+  const tda=new Set(l30.map(r=>r.date)).size;
+  const tdc=l30.length;
+  const bc={};BODY_PARTS.forEach(b=>bc[b.id]=0);l30.forEach(r=>{if(bc[r.bodyPart]!==undefined)bc[r.bodyPart]++});
+  const mbc=Math.max(...Object.values(bc),1),tp=Object.values(bc).filter(v=>v>0).length;
+  const insights=generateInsights(l30,ts,bc);
+  const assessment=generateAssessment(l30,ts,bc,twd,lwd);
+  const rt=computeOverallTrend(l30);
+  let si,sc,st;
+  if(l30.length<3){si='🏋️';sc='new';st='继续积累数据'}
+  else if(rt>0.5){si='🔥';sc='up';st='力量上升中'}
+  else if(rt>-0.5){si='⚡';sc='stable';st='稳步推进中'}
+  else{si='📉';sc='down';st='注意恢复'}
+  c.innerHTML=`<div class="summary-card"><div class="summary-header"><div class="summary-status-icon ${sc}">${si}</div><div class="summary-status-text"><div class="summary-status-label">RECENT STATUS 近期状态</div><div class="summary-status-value ${sc}">${st}</div></div></div><div class="summary-metrics"><div class="summary-metric"><div class="summary-metric-value">${twd}</div><div class="summary-metric-label">本周训练</div><div class="summary-metric-sub ${wd>0?'up':wd<0?'down':''}">${wd>0?'↑'+wd:wd<0?'↓'+Math.abs(wd):'—'} vs上周</div></div><div class="summary-metric"><div class="summary-metric-value">${lwd}</div><div class="summary-metric-label">上周训练</div><div class="summary-metric-sub">天数</div></div><div class="summary-metric"><div class="summary-metric-value">${tdc}</div><div class="summary-metric-label">30天内</div><div class="summary-metric-sub">${tda} 天</div></div><div class="summary-metric"><div class="summary-metric-value">${tp}</div><div class="summary-metric-label">部位覆盖</div><div class="summary-metric-sub">/ ${BODY_PARTS.length} 部位</div></div></div><div class="summary-coverage"><div class="summary-coverage-title">30天部位分布</div><div class="coverage-bars">${BODY_PARTS.map(bp=>{const cnt=bc[bp.id],pct=mbc>0?(cnt/mbc*100):0;return`<div class="coverage-row"><span class="coverage-label">${bp.name}</span><div class="coverage-bar-bg"><div class="coverage-bar-fill" style="width:${pct}%;background:${bp.color}"></div></div><span class="coverage-count">${cnt}</span></div>`}).join('')}</div></div>${assessment?`<div class="summary-assessment"><div class="summary-coverage-title">教练点评</div><div class="assessment-text">${assessment}</div></div>`:''}<div class="summary-insights"><div class="summary-insights-title">训练洞察</div>${insights.map(i=>`<div class="insight-item"><span class="insight-icon">${i.icon}</span><span class="insight-text">${i.text}</span></div>`).join('')}</div></div>`;
+}
+
+function generateAssessment(l30,ts,bc,thisWeekDays,lastWeekDays){
+  if(l30.length<2)return'';
+  const parts=[];
+  const sorted=BODY_PARTS.map(bp=>({...bp,cnt:bc[bp.id]})).sort((a,b)=>b.cnt-a.cnt);
+  const trained=sorted.filter(b=>b.cnt>0),untrained=sorted.filter(b=>b.cnt===0);
+  if(trained.length>0){
+    const top=trained[0];
+    if(trained.length===1)parts.push(`近30天训练集中在<strong>${top.name}部</strong>（${top.cnt}次），建议拓展到更多部位以获得均衡发展。`);
+    else{
+      const topNames=trained.slice(0,Math.min(3,trained.length)).map(b=>`<strong>${b.name}</strong>(${b.cnt}次)`).join('、');
+      parts.push(`近30天训练覆盖了${trained.length}个部位，其中${topNames}较为充分。`);
+    }
+  }
+  if(untrained.length>0&&untrained.length<BODY_PARTS.length){
+    parts.push(`<span class="hl-warn">${untrained.map(b=>b.name).join('、')}</span>近30天没有训练记录，长期忽略可能导致肌力失衡和体态问题，建议每周至少安排1次。`);
+  }
+  const weak=trained.filter(b=>b.cnt>0&&b.cnt<=2);
+  if(weak.length>0&&untrained.length===0){
+    parts.push(`${weak.map(b=>'<span class="hl-warn">'+b.name+'</span>').join('、')}训练频次偏低（各仅${weak.map(b=>b.cnt).join('/')}次），可适当增加。`);
+  }
+  const prMap=computePRMap();const exs=[...new Set(l30.map(r=>r.exercise))];
+  const upExs=[],downExs=[];
+  exs.forEach(ex=>{
+    const recs=l30.filter(r=>r.exercise===ex).sort((a,b)=>a.date.localeCompare(b.date));
+    if(recs.length<2)return;
+    const first=Math.max(...recs[0].sets.map(s=>s.weight)),last=Math.max(...recs[recs.length-1].sets.map(s=>s.weight));
+    const pct=((last-first)/first*100).toFixed(0);
+    if(pct>=5)upExs.push(`${ex}(${first}→${last}kg, <span class="hl-up">+${pct}%</span>)`);
+    else if(pct<=-5)downExs.push(`${ex}(<span class="hl-down">${pct}%</span>)`);
+  });
+  if(upExs.length)parts.push(`力量提升亮点：${upExs.join('、')}，保持这个趋势！`);
+  if(downExs.length)parts.push(`需要关注：${downExs.join('、')}出现下降，可能与过度训练、睡眠不足或营养摄入有关。`);
+  const totalDays=new Set(l30.map(r=>r.date)).size;
+  const freqPerWeek=(totalDays/4.3).toFixed(1);
+  if(freqPerWeek>=4.5)parts.push(`当前训练频率约<strong>${freqPerWeek}次/周</strong>，属于高频训练，注意安排充足的休息和恢复日。`);
+  else if(freqPerWeek>=3)parts.push(`当前训练频率约<strong>${freqPerWeek}次/周</strong>，频率不错，保持稳定。`);
+  else if(freqPerWeek>=1.5)parts.push(`当前训练频率约<strong>${freqPerWeek}次/周</strong>，如目标是增肌可考虑提升到3-4次/周。`);
+  else if(totalDays>0)parts.push(`当前训练频率较低（约<strong>${freqPerWeek}次/周</strong>），建议至少保持每周3次以维持进步。`);
+  if(trained.length>=4&&untrained.length===0&&parseFloat(freqPerWeek)>=3)
+    parts.push('<span class="hl-up">整体训练计划较为均衡，继续保持！</span>');
+  return parts.join('');
+}
+
+function computeOverallTrend(recs){if(recs.length<4)return-1000;const exs=[...new Set(recs.map(r=>r.exercise))];let t=0,c=0;exs.forEach(ex=>{const er=recs.filter(r=>r.exercise===ex).sort((a,b)=>a.date.localeCompare(b.date));if(er.length<2)return;const h=Math.floor(er.length/2),f=er.slice(0,h),s=er.slice(h);const af=f.reduce((s,r)=>s+Math.max(...r.sets.map(ss=>ss.weight)),0)/f.length,as=s.reduce((s,r)=>s+Math.max(...r.sets.map(ss=>ss.weight)),0)/s.length;if(af>0){t+=(as-af)/af*100;c++}});return c>0?t/c:-1000}
+
+function generateInsights(l30,ts,bc){
+  const ins=[];const pm=computePRMap();
+  Object.entries(pm).filter(([,pr])=>{const d=daysBetween(pr.date,ts);return d<=14&&d>=0}).forEach(([ex,pr])=>{ins.push({icon:'🏆',text:`${ex} 达到 ${pr.weight}kg 个人最佳！`})});
+  const exs=[...new Set(l30.map(r=>r.exercise))];
+  exs.forEach(ex=>{const er=l30.filter(r=>r.exercise===ex).sort((a,b)=>a.date.localeCompare(b.date));if(er.length>=3){const r3=er.slice(-3),mw=r3.map(r=>Math.max(...r.sets.map(s=>s.weight))),p=((mw[2]-mw[0])/mw[0]*100).toFixed(0);if(mw[2]>mw[0]&&Math.abs(p)>=3)ins.push({icon:'📈',text:`${ex} 近3次最大重量上升 ${p}%，保持势头！`});else if(mw[2]<mw[0]&&Math.abs(p)>=5)ins.push({icon:'⚠️',text:`${ex} 近3次重量下降 ${Math.abs(p)}%，注意休息恢复`})}});
+  const tsets=l30.reduce((s,r)=>s+r.sets.length,0),tvol=l30.reduce((s,r)=>s+r.sets.reduce((ss,set)=>ss+set.weight*set.reps,0),0);
+  if(tvol>0)ins.push({icon:'📊',text:`30天累计 ${tsets} 组训练，总训练量 ${(tvol/1000).toFixed(1)} 吨`});
+  const allDates=[...new Set(state.records.map(r=>r.date))].sort((a,b)=>b.localeCompare(a));
+  if(allDates.length>=2){let streak=0;for(let i=0;i<allDates.length-1;i++){if(daysBetween(allDates[i+1],allDates[i])<=3)streak++;else break}if(streak>=3)ins.push({icon:'🔥',text:`已连续训练 ${streak+1} 次，坚持就是胜利！`})}
+  return ins.slice(0,8);
+}
+
+let trendChart=null,volumeChart=null;
+function populateExerciseSelect(){const s=document.getElementById('trendExercise'),cv=s.value,gm={};state.records.forEach(r=>{if(!gm[r.bodyPart])gm[r.bodyPart]=new Set();gm[r.bodyPart].add(r.exercise)});let h='<option value="">选择训练动作查看趋势</option>';BODY_PARTS.forEach(bp=>{if(gm[bp.id]){h+=`<optgroup label="${bp.name}">`;gm[bp.id].forEach(ex=>{h+=`<option value="${ex}" ${ex===cv?'selected':''}>${ex}</option>`});h+='</optgroup>'}});s.innerHTML=h}
+function shortDate(d){const m=d.match(/(\d+)月(\d+)日/);return m?`${m[1]}/${m[2]}`:d}
+function renderTrend(){const ex=document.getElementById('trendExercise').value,c=document.getElementById('trendContent');if(!ex){c.innerHTML='<div class="trend-empty"><div style="font-size:40px;margin-bottom:12px;opacity:.5">📊</div><div style="font-size:14px;line-height:1.8">选择一个训练动作<br>查看你的力量变化趋势</div></div>';return}const recs=state.records.filter(r=>r.exercise===ex).sort((a,b)=>a.date.localeCompare(b.date));if(!recs.length){c.innerHTML='<div class="trend-empty"><div style="font-size:40px;margin-bottom:12px;opacity:.5">📊</div><div style="font-size:14px">暂无数据</div></div>';return}const bp=getBodyPart(recs[0].bodyPart),dates=recs.map(r=>formatDate(r.date)),mw=recs.map(r=>Math.max(...r.sets.map(s=>s.weight))),vols=recs.map(r=>r.sets.reduce((s,ss)=>s+ss.weight*ss.reps,0)),cur=mw[mw.length-1],fst=mw[0],prog=fst>0?((cur-fst)/fst*100).toFixed(1):0,atm=Math.max(...mw);
+c.innerHTML=`<div class="stats-grid"><div class="stat-card"><div class="stat-value">${cur}<span style="font-size:14px;color:var(--text-3)">kg</span></div><div class="stat-label">当前最大</div></div><div class="stat-card"><div class="stat-value ${Number(prog)>=0?'positive':'negative'}">${Number(prog)>=0?'+':''}${prog}%</div><div class="stat-label">总进步</div></div><div class="stat-card"><div class="stat-value">${atm}<span style="font-size:14px;color:var(--text-3)">kg</span></div><div class="stat-label">历史最佳 PR</div></div><div class="stat-card"><div class="stat-value">${recs.length}</div><div class="stat-label">训练次数</div></div></div><div class="chart-container"><div class="chart-title">最大重量趋势 (KG)</div><div class="chart-wrapper"><canvas id="maxWeightChart"></canvas></div></div><div class="chart-container"><div class="chart-title">训练容量趋势 (KG × REPS)</div><div class="chart-wrapper"><canvas id="volumeChart"></canvas></div></div><div class="chart-container"><div class="chart-title">PR 记录</div><div class="pr-list" id="prList"></div></div>`;
+renderCharts(dates,mw,vols,bp);renderPRList(recs)}
+
+function renderCharts(dates,mw,vols,bp){
+  const sd=dates.map(shortDate),mp=dates.length>8,tt={backgroundColor:'#1E1E26',titleColor:'#EEEEF2',bodyColor:'#9999AA',borderColor:'#2A2A36',borderWidth:1,cornerRadius:8,padding:12,titleFont:{family:'Space Mono',size:12},bodyFont:{family:'Space Mono',size:12},displayColors:false},
+  xa={grid:{color:'rgba(255,255,255,.04)',drawTicks:false},ticks:{color:'#5C5C6E',font:{size:11,family:'Space Mono'},maxRotation:0,autoSkip:true,maxTicksLimit:mp?6:10,padding:6},border:{display:false}},
+  wmin=Math.min(...mw),wmax=Math.max(...mw),wp=Math.max((wmax-wmin)*.25,wmax*.05,5);
+  if(trendChart)trendChart.destroy();if(volumeChart)volumeChart.destroy();
+  trendChart=new Chart(document.getElementById('maxWeightChart').getContext('2d'),{type:'line',data:{labels:sd,datasets:[{data:mw,borderColor:bp.color,backgroundColor:ctx=>{const ch=ctx.chart,{ctx:cc,chartArea:ca}=ch;if(!ca)return bp.color+'20';const g=cc.createLinearGradient(0,ca.top,0,ca.bottom);g.addColorStop(0,bp.color+'30');g.addColorStop(1,bp.color+'02');return g},fill:true,tension:.35,pointRadius:mp?3:5,pointBackgroundColor:bp.color,pointBorderColor:'#131318',pointBorderWidth:2,pointHoverRadius:7,borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{title:i=>dates[i[0].dataIndex],label:i=>`最大重量: ${i.raw} kg`}}},scales:{x:xa,y:{grid:{color:'rgba(255,255,255,.04)',drawTicks:false},border:{display:false},ticks:{color:'#5C5C6E',font:{size:11,family:'Space Mono'},padding:8},suggestedMin:Math.floor((wmin-wp)/5)*5,suggestedMax:Math.ceil((wmax+wp*.5)/5)*5}},interaction:{intersect:false,mode:'index'},layout:{padding:{top:8,right:4,bottom:4,left:4}}}});
+  volumeChart=new Chart(document.getElementById('volumeChart').getContext('2d'),{type:'bar',data:{labels:sd,datasets:[{data:vols,backgroundColor:bp.color+'45',hoverBackgroundColor:bp.color+'70',borderColor:bp.color,borderWidth:1.5,borderRadius:6,borderSkipped:false,maxBarThickness:36}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{...tt,callbacks:{title:i=>dates[i[0].dataIndex],label:i=>`训练量: ${i.raw} kg`}}},scales:{x:xa,y:{grid:{color:'rgba(255,255,255,.04)',drawTicks:false},border:{display:false},ticks:{color:'#5C5C6E',font:{size:11,family:'Space Mono'},padding:8},beginAtZero:true}},interaction:{intersect:false,mode:'index'},layout:{padding:{top:8,right:4,bottom:4,left:4}}}})
+}
+function renderPRList(recs){let rm=0;const prs=[];recs.forEach(r=>{const w=Math.max(...r.sets.map(s=>s.weight));if(w>rm){rm=w;prs.push({weight:w,date:r.date})}});prs.reverse();document.getElementById('prList').innerHTML=prs.map((p,i)=>`<div class="pr-item"><div class="pr-badge">${i===0?'🏆':'⬆️'}</div><div class="pr-info"><div class="pr-weight">${p.weight} kg</div><div class="pr-date">${formatDate(p.date)}</div></div></div>`).join('')}
+
+function renderGuide(){
+  const fc=document.getElementById('guideFilters');
+  const userExSet=new Set();state.records.forEach(r=>userExSet.add(`${r.bodyPart}|${r.exercise}`));
+  fc.innerHTML=`<button class="filter-chip ${state.guideFilterMine?'active':''}" onclick="setGuideFilterMine(true)">我的动作</button><button class="filter-chip ${!state.guideFilterMine&&state.guideFilter==='all'?'active':''}" onclick="setGuideFilterMine(false);setGuideFilter('all')">全部</button>${BODY_PARTS.map(bp=>`<button class="filter-chip ${!state.guideFilterMine&&state.guideFilter===bp.id?'active':''}" onclick="setGuideFilterMine(false);setGuideFilter('${bp.id}')"><span class="filter-dot" style="background:${bp.color}"></span>${bp.name}</button>`).join('')}`;
+  const lc=document.getElementById('guideList');let html='';
+  let items=[];
+  if(state.guideFilterMine){
+    const byBp={};state.records.forEach(r=>{if(!byBp[r.bodyPart])byBp[r.bodyPart]=new Set();byBp[r.bodyPart].add(r.exercise)});
+    Object.entries(byBp).forEach(([bpId,exNames])=>{
+      const bp=getBodyPart(bpId);if(!bp)return;
+      exNames.forEach(userEx=>{
+        const guide=matchExerciseToGuide(userEx,bpId);
+        items.push({bp,displayName:userEx,guide,isUser:true});
+      });
+    });
+  }else{
+    const bps=state.guideFilter==='all'?BODY_PARTS:BODY_PARTS.filter(b=>b.id===state.guideFilter);
+    bps.forEach(bp=>{(EXERCISE_GUIDE[bp.id]||[]).forEach(ex=>items.push({bp,displayName:ex.name,guide:ex,isUser:userExSet.has(`${bp.id}|${ex.name}`)}))});
+  }
+  if(items.length===0&&state.guideFilterMine){lc.innerHTML='<div class="summary-empty" style="padding:40px 20px">暂无训练记录。<br>先去记录训练，这里会显示你练过的动作指导</div>';return}
+  items.forEach(({bp,displayName,guide,isUser})=>{
+    const diffDots=guide?Array.from({length:3},(_,i)=>`<div class="guide-diff-dot ${i<(guide.diff||1)?'active':''}"></div>`).join(''):'';
+    const diffLabel=guide?`<span class="guide-diff-label">难度 ${getDifficultyStars(guide.diff||1)}</span>`:'';
+    const mineBadge=isUser?'<span class="guide-badge-mine">已练</span>':'';
+    if(guide){
+      const ex=guide;const diffDotsInner=Array.from({length:3},(_,i)=>`<div class="guide-diff-dot ${i<ex.diff?'active':''}"></div>`).join('');
+      html+=`<div class="guide-card" id="guide-${bp.id}-${(ex.name+displayName).replace(/\s/g,'')}">
+        <div class="guide-card-header" onclick="toggleGuide(this)" style="--bp-color:${bp.color};--bp-rgb:${bp.rgb}">
+          <div class="guide-card-color" style="background:${bp.color}"></div>
+          <div class="guide-card-title"><div class="guide-card-name">${displayName}${mineBadge}</div><div class="guide-card-aka">${ex.aka}</div></div>
+          <div class="guide-card-diff">${diffDotsInner}</div><span class="guide-diff-label">难度 ${getDifficultyStars(ex.diff)}</span>
+          <div class="guide-card-arrow">›</div>
+        </div>
+        <div class="guide-card-body" style="--bp-color:${bp.color};--bp-rgb:${bp.rgb}">
+          <div class="guide-muscles">${ex.primary.map(m=>`<span class="muscle-tag primary">${m}</span>`).join('')}${ex.secondary.map(m=>`<span class="muscle-tag secondary">${m}</span>`).join('')}</div>
+          ${ex.svg?`<div class="guide-diagram">${ex.svg}</div>`:''}
+          <div class="guide-diagram" style="padding:12px 14px">
+            <div class="guide-poses" style="gap:6px;width:100%">
+              <div class="guide-pose"><div class="pose-badge start">A</div><div class="pose-text">${ex.start}</div></div>
+              <div class="guide-pose"><div class="pose-badge end">B</div><div class="pose-text">${ex.end}</div></div>
+            </div>
+          </div>
+          <div class="guide-sub tips">动作要领</div>
+          <ol class="guide-steps">${ex.steps.map(s=>`<li><span>${s}</span></li>`).join('')}</ol>
+          <div class="guide-sub tips">关键提示</div>
+          <ul class="guide-tips do">${ex.tips.map(t=>`<li>${t}</li>`).join('')}</ul>
+          <div class="guide-sub warn">常见错误</div>
+          <ul class="guide-tips dont">${ex.mistakes.map(m=>`<li>${m}</li>`).join('')}</ul>
+        </div>
+      </div>`;
+    }else{
+      const exs=(EXERCISE_GUIDE[bp.id]||[]).map(e=>e.name);
+      html+=`<div class="guide-card" id="guide-${bp.id}-${String(displayName).replace(/\s/g,'')}">
+        <div class="guide-card-header" onclick="toggleGuide(this)" style="--bp-color:${bp.color};--bp-rgb:${bp.rgb}">
+          <div class="guide-card-color" style="background:${bp.color}"></div>
+          <div class="guide-card-title"><div class="guide-card-name">${displayName}${mineBadge}</div><div class="guide-card-aka">你的动作</div></div>
+          <div class="guide-card-arrow">›</div>
+        </div>
+        <div class="guide-card-body" style="--bp-color:${bp.color};--bp-rgb:${bp.rgb}">
+          <div class="summary-empty" style="padding:20px">暂无「${displayName}」的详细动作指导。<br>可参考同部位动作：${exs.length?exs.slice(0,4).join('、'):'—'}</div>
+        </div>
+      </div>`;
+    }
+  });
+  lc.innerHTML=html;
+}
+function toggleGuide(el){el.closest('.guide-card').classList.toggle('open')}
+function setGuideFilter(f){state.guideFilter=f;state.guideFilterMine=false;renderGuide()}
+function setGuideFilterMine(v){state.guideFilterMine=v;renderGuide()}
+
+function switchView(v){document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===v));if(v==='history')renderHistory();if(v==='trends'){renderSummary();populateExerciseSelect();renderTrend()}if(v==='record')renderTodayLog();if(v==='guide')renderGuide();document.querySelector('.main-content').scrollTop=0}
+
+function exportData(){const b=new Blob([JSON.stringify(state.records,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`forge-backup-${today()}.json`;a.click();URL.revokeObjectURL(u);showToast('数据已导出')}
+function exportTemplate(){const h=[['日期','部位','动作','重量(kg)','次数']],s=[['2025-02-28','腿','哈克深蹲',150,10],['2025-02-28','腿','哈克深蹲',150,8],['2025-02-28','腿','深蹲',120,12],['2025-02-21','胸','卧推',80,10]];const ws=XLSX.utils.aoa_to_sheet([...h,...s]);ws['!cols']=[{wch:12},{wch:8},{wch:14},{wch:10},{wch:6}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'训练记录');XLSX.writeFile(wb,'forge-template.xlsx');showToast('模板已下载')}
+function triggerImport(){document.getElementById('importFile').click()}
+function importData(event){
+  const file=event.target.files[0];if(!file)return;const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='json'){const r=new FileReader();r.onload=function(e){try{const imp=JSON.parse(e.target.result);if(Array.isArray(imp)){const ids=new Set(state.records.map(r=>r.id));let n=0;imp.forEach(r=>{if(!ids.has(r.id)){state.records.push(r);n++}});saveData();renderTodayLog();renderSummary();showToast(`已导入 ${n} 条新记录`)}else showToast('文件格式不正确')}catch(err){showToast('导入失败')}};r.readAsText(file)}
+  else if(['xlsx','xls','csv'].includes(ext)){const r=new FileReader();r.onload=function(e){try{const d=new Uint8Array(e.target.result),wb=XLSX.read(d,{type:'array',cellDates:true}),sh=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(sh,{header:1,raw:false,dateNF:'yyyy-mm-dd'}),res=parseExcelRows(rows);if(res.error){showToast(res.error);return}const ids=new Set(state.records.map(r=>r.id));let n=0;res.records.forEach(r=>{if(!ids.has(r.id)){state.records.push(r);n++}});saveData();renderTodayLog();renderSummary();showToast(`已从 Excel 导入 ${n} 条记录`)}catch(err){console.error(err);showToast('Excel 解析失败')}};r.readAsArrayBuffer(file)}
+  else showToast('不支持的文件格式');
+  event.target.value='';
+}
+const BP_NAME_MAP={};BODY_PARTS.forEach(bp=>{BP_NAME_MAP[bp.name]=bp.id;BP_NAME_MAP[bp.id]=bp.id});
+BP_NAME_MAP['胸部']='chest';BP_NAME_MAP['肩部']='shoulders';BP_NAME_MAP['肩膀']='shoulders';BP_NAME_MAP['背部']='back';BP_NAME_MAP['腿部']='legs';BP_NAME_MAP['手臂']='arms';BP_NAME_MAP['核心']='core';BP_NAME_MAP['腹部']='core';BP_NAME_MAP['腹']='core';
+function resolveBodyPart(raw){if(!raw)return null;const s=String(raw).trim();if(BP_NAME_MAP[s])return BP_NAME_MAP[s];for(const[k,v]of Object.entries(BP_NAME_MAP))if(s.includes(k)||k.includes(s))return v;return null}
+function parseExcelDate(raw){if(raw==null||raw==='')return null;if(typeof raw==='number'&&raw>10000){const d=new Date((raw-25569)*86400000);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}if(raw instanceof Date){return`${raw.getFullYear()}-${String(raw.getMonth()+1).padStart(2,'0')}-${String(raw.getDate()).padStart(2,'0')}`}const s=String(raw).trim();let m;if(m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))return`${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;if(m=s.match(/^(\d{4})[\/.](\d{1,2})[\/.](\d{1,2})/))return`${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;if(m=s.match(/(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日/))return`${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;if(m=s.match(/^(\d{1,2})[\/.-](\d{1,2})$/))return`${new Date().getFullYear()}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;if(!isNaN(Date.parse(s))){const d=new Date(s);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}return null}
+function detectColumns(hr){const m={date:-1,bodyPart:-1,exercise:-1,weight:-1,reps:-1};const dw=['日期','date','时间'],bw=['部位','肌群','body','muscle','part'],ew=['动作','项目','练习','exercise','名称','训练'],ww=['重量','weight','kg','负重'],rw=['次数','reps','次','rep'];hr.forEach((c,i)=>{const s=String(c||'').toLowerCase().trim();if(m.date===-1&&dw.some(w=>s.includes(w)))m.date=i;else if(m.bodyPart===-1&&bw.some(w=>s.includes(w)))m.bodyPart=i;else if(m.exercise===-1&&ew.some(w=>s.includes(w)))m.exercise=i;else if(m.weight===-1&&ww.some(w=>s.includes(w)))m.weight=i;else if(m.reps===-1&&rw.some(w=>s.includes(w)))m.reps=i});return m}
+function parseExcelRows(rows){if(rows.length<2)return{error:'文件为空'};let cm=detectColumns(rows[0]),ds=1;if(cm.date===-1||cm.exercise===-1||cm.weight===-1){cm=detectColumns(rows.length>1?rows[1]:[]);if(cm.date===-1||cm.exercise===-1||cm.weight===-1){cm={date:0,bodyPart:1,exercise:2,weight:3,reps:4};ds=1}else ds=2}const gp={};let ld=null,lb=null;for(let i=ds;i<rows.length;i++){const row=rows[i];if(!row||!row.length||row.every(c=>!c&&c!==0))continue;let dv=cm.date>=0?parseExcelDate(row[cm.date]):null;if(!dv&&ld)dv=ld;if(!dv)continue;ld=dv;let bv=cm.bodyPart>=0?resolveBodyPart(row[cm.bodyPart]):null;if(!bv&&lb)bv=lb;if(bv)lb=bv;const ex=cm.exercise>=0?String(row[cm.exercise]||'').trim():'';if(!ex)continue;if(!bv){for(const[bid,el]of Object.entries(DEFAULT_EXERCISES))if(el.includes(ex)){bv=bid;break}}if(!bv)bv='chest';const w=parseFloat(row[cm.weight])||0,rp=cm.reps>=0?(parseInt(row[cm.reps])||0):0;if(w<=0)continue;const k=`${dv}|${bv}|${ex}`;if(!gp[k])gp[k]={date:dv,bodyPart:bv,exercise:ex,sets:[]};gp[k].sets.push({weight:w,reps:rp||1})}const recs=Object.values(gp).map(g=>({id:generateId(),date:g.date,bodyPart:g.bodyPart,exercise:g.exercise,sets:g.sets}));if(!recs.length)return{error:'未识别到有效数据'};return{records:recs}}
+
+loadData();initRecordView();renderTodayLog();
+</script>
+</body>
+</html>
