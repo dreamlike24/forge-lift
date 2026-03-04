@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+SC:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg:#0A0A0C;--surface:#131318;--surface-2:#1B1B22;--surface-3:#24242E;--border:#2A2A36;
@@ -224,14 +225,36 @@
     .user-card-info{flex:1;min-width:0}
     .user-card-name{font-size:14px;font-weight:500}
     .user-card-role{font-size:11px;color:var(--text-3);margin-top:2px}
-    .user-card-actions{display:flex;gap:8px;align-items:center}
-    .user-toggle{width:44px;height:24px;border-radius:12px;background:var(--surface-3);position:relative;cursor:pointer;transition:background .2s}
+    .user-card-actions{display:flex;gap:10px;align-items:center}
+    .user-toggle-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    .user-toggle-wrap:hover .user-toggle-label{color:var(--text)}
+    .user-toggle{width:44px;height:24px;border-radius:12px;background:var(--surface-3);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
     .user-toggle.on{background:var(--success)}
     .user-toggle::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
     .user-toggle.on::after{transform:translateX(20px)}
+    .user-toggle-label{font-size:12px;color:var(--text-3)}
+    .user-list-empty{text-align:center;padding:24px;color:var(--text-3);font-size:13px}
+    .settings-entry{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+    .settings-entry:hover{border-color:var(--accent);background:var(--surface-2)}
+    .settings-entry-title{font-size:15px;font-weight:500}
+    .settings-entry-desc{font-size:12px;color:var(--text-3);margin-top:4px}
+    .settings-entry-arrow{color:var(--text-3);font-size:18px}
+    .settings-sub-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+    .header-back-btn{border:none;background:none;color:var(--accent);font-size:16px;cursor:pointer;padding:4px 0}
+    .header-back-btn:hover{opacity:.9}
+    .settings-sub-title{font-size:16px;font-weight:600}
     .add-user-form{background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius);padding:16px;margin-bottom:20px}
     .add-user-form .input-row{margin-bottom:10px}
     .pwd-warn{font-size:12px;margin-top:16px;padding:12px;background:rgba(245,158,11,.2);color:var(--warning);border:1px solid var(--warning);border-radius:var(--radius-sm)}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px}
+    .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:360px;width:100%}
+    .modal-title{font-size:16px;font-weight:600;margin-bottom:16px;color:var(--text)}
+    .modal-actions{display:flex;gap:12px;margin-top:20px;justify-content:flex-end}
+    .user-card-actions{display:flex;gap:8px;align-items:center}
+    .user-delete-btn{padding:6px 12px;border-radius:var(--radius-xs);border:1px solid var(--danger);background:transparent;color:var(--danger);cursor:pointer;font-size:12px;flex-shrink:0}.user-delete-btn:hover{background:var(--danger);color:#fff}
+    .created-cred-box{background:var(--surface-2);border:1px solid var(--success);border-radius:var(--radius-sm);padding:14px;color:var(--success)}
+    .created-cred-box code{display:block;margin:8px 0;font-family:Space Mono,monospace;font-size:13px;word-break:break-all}
+    .created-cred-box .copy-btn{margin-top:8px;padding:6px 14px;font-size:12px;border:1px solid var(--success);border-radius:var(--radius-xs);background:transparent;color:var(--success);cursor:pointer}.created-cred-box .copy-btn:hover{background:var(--success);color:var(--bg)}
     @media(min-width:481px){#app{border-left:1px solid var(--border);border-right:1px solid var(--border)}}
   </style>
 </head>
@@ -241,19 +264,28 @@
     <div class="login-logo">IRONLOG<span>艾若乐格</span></div>
     <div class="login-sub">登录后使用全部功能</div>
     <form class="login-form" onsubmit="return doLogin(event)">
-      <input type="text" class="text-input" id="loginUser" placeholder="账号" required autocomplete="username">
-      <input type="password" class="text-input" id="loginPwd" placeholder="密码" required autocomplete="current-password">
+      <input type="text" class="text-input" id="loginUser" name="username" placeholder="账号" required autocomplete="username">
+      <input type="password" class="text-input" id="loginPwd" name="password" placeholder="密码" required autocomplete="current-password">
       <button type="submit" class="save-btn">登 录</button>
       <div class="login-err" id="loginErr"></div>
     </form>
+  </div>
+</div>
+<div id="deleteConfirmModal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title" id="deleteConfirmTitle">确认删除</div>
+    <div id="deleteConfirmMsg" style="font-size:14px;color:var(--text-2);margin-bottom:16px"></div>
+    <div class="modal-actions">
+      <button class="add-set-btn" onclick="closeDeleteConfirmModal()">取消</button>
+      <button class="save-btn" style="background:var(--danger);border-color:var(--danger)" onclick="confirmDeleteUser()">确认删除</button>
+    </div>
   </div>
 </div>
 <div id="app" style="display:none">
   <header class="app-header">
     <div class="app-logo" id="headerLogo" onclick="maybeBack()" style="cursor:pointer">IRONLOG<span>艾若乐格</span></div>
     <div class="header-actions">
-      <button class="header-btn" id="btnSettings" onclick="switchView('settings')" title="账号管理" style="display:none">⚙️</button>
-      <button class="header-btn" onclick="switchView('account')" title="修改账号">👤</button>
+      <button class="header-btn" id="btnSettings" onclick="switchView('settings')" title="设置">⚙️</button>
       <button class="header-btn" onclick="exportTemplate()" title="下载Excel模板" style="font-size:13px">T</button>
       <button class="header-btn" onclick="exportData()" title="导出数据">↓</button>
       <button class="header-btn" onclick="triggerImport()" title="导入数据">↑</button>
@@ -306,27 +338,41 @@
       <div id="guideList"></div>
     </div>
     <div id="view-settings" class="view">
-      <div class="section-title">SETTINGS 账号管理</div>
-      <div class="add-user-form">
-        <div class="input-row"><input type="text" class="text-input" id="newUserName" placeholder="新账号"></div>
-        <div class="input-row"><input type="password" class="text-input" id="newUserPwd" placeholder="新密码"></div>
-        <button class="save-btn" onclick="addUser()">添加普通用户</button>
-        <div id="addUserResult" style="margin-top:12px;font-size:13px"></div>
+      <div id="settingsMain" class="settings-sub">
+        <div class="section-title">SETTINGS 设置</div>
+        <div id="settingsEntryCreate" class="settings-entry" onclick="showSettingsSub('create')" style="display:none">
+          <div><div class="settings-entry-title">① 创建账号</div><div class="settings-entry-desc">创建新用户、分配账号，可关闭或删除</div></div>
+          <span class="settings-entry-arrow">›</span>
+        </div>
+        <div class="settings-entry" onclick="showSettingsSub('modify')">
+          <div><div class="settings-entry-title">② 修改用户账号密码</div><div class="settings-entry-desc">修改自己的账号和密码</div></div>
+          <span class="settings-entry-arrow">›</span>
+        </div>
+        <button class="add-set-btn" style="margin-top:24px" onclick="logout()">退出登录</button>
       </div>
-      <div class="settings-section">
-        <div class="settings-section-title">用户列表</div>
-        <div id="userList"></div>
+      <div id="settingsCreate" class="settings-sub" style="display:none">
+        <div class="settings-sub-header"><button class="header-back-btn" onclick="showSettingsSub('main')">‹ 返回</button><span class="settings-sub-title">创建账号</span></div>
+        <div style="font-size:13px;color:var(--text-3);margin-bottom:16px">自定义账号密码创建新用户。账号：字母，15位以内；密码：纯数字，4-6位</div>
+        <div class="add-user-form">
+          <div class="input-row"><input type="text" class="text-input" id="newUserName" placeholder="账号（字母，15位以内）" maxlength="15"></div>
+          <div class="input-row"><input type="password" class="text-input" id="newUserPwd" placeholder="密码（纯数字4-6位）" maxlength="6" inputmode="numeric"></div>
+          <button class="save-btn" onclick="addUser()">创建账号</button>
+        </div>
+        <div id="addUserResult" class="created-cred-box" style="margin-top:16px;display:none"></div>
+        <div class="settings-section-title" style="margin-top:24px">已创建的账号</div>
+        <div style="font-size:12px;color:var(--text-3);margin-bottom:12px">创建后下方展示，可复制分享。支持关闭（禁用）和删除。</div>
+        <div id="userList" class="user-list-container"></div>
       </div>
-    </div>
-    <div id="view-account" class="view">
-      <div class="section-title">ACCOUNT 修改账号</div>
-      <div class="pwd-warn">⚠️ 请妥善保管账号密码，修改后请务必记录</div>
-      <div style="margin-top:20px">
-        <div class="input-row" style="margin-bottom:12px"><input type="password" class="text-input" id="accountCurPwd" placeholder="当前密码（验证身份）"></div>
-        <div class="input-row" style="margin-bottom:12px"><input type="text" class="text-input" id="accountNewName" placeholder="新账号名（留空不变）"></div>
-        <div class="input-row" style="margin-bottom:12px"><input type="password" class="text-input" id="accountNewPwd" placeholder="新密码（留空不变）"></div>
-        <button class="save-btn" onclick="changeAccount()">保存修改</button>
-        <button class="add-set-btn" style="margin-top:16px" onclick="logout()">退出登录</button>
+      <div id="settingsModify" class="settings-sub" style="display:none">
+        <div class="settings-sub-header"><button class="header-back-btn" onclick="showSettingsSub('main')">‹ 返回</button><span class="settings-sub-title">修改用户账号密码</span></div>
+        <div style="font-size:13px;color:var(--text-3);margin-bottom:12px">账号：字母，15位以内；密码：纯数字，4-6位</div>
+        <div class="pwd-warn">⚠️ 请妥善保管账号密码，修改后请务必记录</div>
+        <div style="margin-top:16px">
+          <div class="input-row" style="margin-bottom:12px"><input type="password" class="text-input" id="accountCurPwd" placeholder="当前密码（验证身份）"></div>
+          <div class="input-row" style="margin-bottom:12px"><input type="text" class="text-input" id="accountNewName" placeholder="新账号（字母，15位以内）" maxlength="15"></div>
+          <div class="input-row" style="margin-bottom:12px"><input type="password" class="text-input" id="accountNewPwd" placeholder="新密码（纯数字4-6位）" maxlength="6" inputmode="numeric"></div>
+          <button class="save-btn" onclick="changeAccount()">保存修改</button>
+        </div>
       </div>
     </div>
   </div>
@@ -339,6 +385,11 @@
 </div>
 <div class="toast" id="toast"></div>
 <script>
+/* ===== Supabase 配置（填写后启用多端同步） ===== */
+const SUPABASE_URL='https://pypyqaajwqoydhxhakea.supabase.co';const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5cHlxYWFqd3FveWRoeGhha2VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1OTk4MzEsImV4cCI6MjA4ODE3NTgzMX0.RwS6vE_NsnNCB_tln32s-T7gcVUSZ1K0R-ycP02_U9k';
+const USE_SUPABASE=!!(SUPABASE_URL&&SUPABASE_ANON_KEY&&SUPABASE_URL.includes('supabase'));
+let supabaseClient=null;let _authCache=null;if(USE_SUPABASE){try{const{createClient}=window.supabase;supabaseClient=createClient(SUPABASE_URL,SUPABASE_ANON_KEY)}catch(e){console.warn('Supabase init failed',e)}}
+
 const BP_SVG={
   chest:`<svg viewBox="0 0 48 36" fill="currentColor"><path d="M23 6C17 3 8 4 5 10C2 16 5 24 12 26C16 27 20 25 23 21L24 19L25 21C28 25 32 27 36 26C43 24 46 16 43 10C40 4 31 3 25 6L24 7L23 6Z"/></svg>`,
   shoulders:`<svg viewBox="0 0 52 36" fill="currentColor"><path d="M20 14L20 34L32 34L32 14" opacity=".15"/><ellipse cx="10" cy="16" rx="10" ry="12"/><ellipse cx="42" cy="16" rx="10" ry="12"/></svg>`,
@@ -492,22 +543,26 @@ function getDifficultyStars(d){const s=['★☆☆','★★☆','★★★'];ret
 /* ===== Auth ===== */
 const AUTH_EXPIRY_DAYS=15;
 async function hashPwd(p){const b=new TextEncoder().encode(p);const h=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('')}
-function getAuth(){try{const s=localStorage.getItem('forge_auth');if(!s)return null;const a=JSON.parse(s);if(a.expiresAt<Date.now()){localStorage.removeItem('forge_auth');return null}return a}catch(e){return null}}
-function setAuth(username,role){const a={username,role,expiresAt:Date.now()+AUTH_EXPIRY_DAYS*86400000};localStorage.setItem('forge_auth',JSON.stringify(a))}
-function logout(){localStorage.removeItem('forge_auth');document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none'}
-async function getUsers(){try{let u=JSON.parse(localStorage.getItem('forge_users')||'[]');if(u.length===0){u=[{username:'DL24',passwordHash:await hashPwd('260303'),role:'admin',enabled:true}];localStorage.setItem('forge_users',JSON.stringify(u))}return u}catch(e){return []}}
-function saveUsers(u){localStorage.setItem('forge_users',JSON.stringify(u))}
+function getAuth(){if(USE_SUPABASE&&supabaseClient)return _authCache;try{const s=localStorage.getItem('forge_auth');if(!s)return null;const a=JSON.parse(s);if(a.expiresAt<Date.now()){localStorage.removeItem('forge_auth');return null}return a}catch(e){return null}}
+function isAdmin(){const a=getAuth();if(!a)return false;if(a.role==='admin')return true;const un=(a.username||'').trim();return un.toUpperCase()==='DL24'}
+function setAuth(username,role){if(USE_SUPABASE)return;const a={username,role,expiresAt:Date.now()+AUTH_EXPIRY_DAYS*86400000};localStorage.setItem('forge_auth',JSON.stringify(a))}
+function logout(){if(USE_SUPABASE&&supabaseClient){_authCache=null;supabaseClient.auth.signOut()}localStorage.removeItem('forge_auth');document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none'}
+async function getUsers(){if(USE_SUPABASE&&supabaseClient){try{const{data,error}=await supabaseClient.from('profiles').select('username,role,enabled,id').is('deleted_at',null).order('username');if(error)throw error;return (data||[]).map(r=>({username:r.username,role:r.role,enabled:r.enabled,id:r.id,passwordHash:''}))}catch(e){return[]}}try{let u=JSON.parse(localStorage.getItem('forge_users')||'[]');if(u.length===0){u=[{username:'DL24',passwordHash:await hashPwd('260303'),role:'admin',enabled:true}];localStorage.setItem('forge_users',JSON.stringify(u))}return u}catch(e){return []}}
+function saveUsers(u){if(USE_SUPABASE)return;localStorage.setItem('forge_users',JSON.stringify(u))}
 function getLoginFails(){try{const f=localStorage.getItem('forge_login_fails');return f?parseInt(f,10):0}catch(e){return 0}}
 function setLoginFails(n){try{localStorage.setItem('forge_login_fails',String(n))}catch(e){}}
 function getLoginLock(){try{const t=localStorage.getItem('forge_login_lock');return t?parseInt(t,10):0}catch(e){return 0}}
 function setLoginLock(ms){try{localStorage.setItem('forge_login_lock',String(Date.now()+ms))}catch(e){}}
 function clearLoginFails(){localStorage.removeItem('forge_login_fails');localStorage.removeItem('forge_login_lock')}
-async function doLogin(e){e.preventDefault();const user=document.getElementById('loginUser').value.trim(),pwd=document.getElementById('loginPwd').value;const err=document.getElementById('loginErr');err.textContent='';if(!user||!pwd){err.textContent='请输入账号和密码';showToast('请输入账号和密码');return false}const now=Date.now(),lockUntil=getLoginLock();if(lockUntil>now){const sec=Math.ceil((lockUntil-now)/1000);const msg=sec>=60?`请${Math.ceil(sec/60)}分钟后再试`:`请${sec}秒后再试`;err.textContent=msg;showToast(msg);return false}let users;try{users=await getUsers()}catch(ex){err.textContent='加载失败，请刷新重试';showToast('加载失败，请刷新重试');return false}const hp=await hashPwd(pwd);const u=users.find(x=>x.username===user&&x.enabled);let fail=false;if(!u)fail=true;else if(u.passwordHash!==hp)fail=true;if(fail){const fails=getLoginFails()+1;setLoginFails(fails);let msg;if(fails<=3){msg='账号或密码有误，请查验后输入'}else if(fails===4){setLoginLock(60000);msg='1分钟后再试'}else{setLoginLock(300000);msg='尝试过于频繁，5分钟后再试'}err.textContent=msg;showToast(msg);return false}clearLoginFails();setAuth(user,u.role);document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';initApp();return false}
+async function doLogin(e){e.preventDefault();const user=document.getElementById('loginUser').value.trim(),pwd=document.getElementById('loginPwd').value;const err=document.getElementById('loginErr');err.textContent='';if(!user||!pwd){err.textContent='请输入账号和密码';showToast('请输入账号和密码');return false}const now=Date.now(),lockUntil=getLoginLock();if(lockUntil>now){const sec=Math.ceil((lockUntil-now)/1000);const msg=sec>=60?`请${Math.ceil(sec/60)}分钟后再试`:`请${sec}秒后再试`;err.textContent=msg;showToast(msg);return false}
+if(USE_SUPABASE&&supabaseClient){try{const{data,error}=await supabaseClient.auth.signInWithPassword({email:user+'@ironlog.local',password:pwd});if(error)throw error;let role='user',enabled=true;const{data:prof}=await supabaseClient.from('profiles').select('role,enabled,deleted_at').eq('id',data.user.id).single();if(prof){role=prof.role;enabled=prof.enabled;if(prof.deleted_at){await supabaseClient.auth.signOut();err.textContent='账号已注销';showToast('账号已注销');return false}}if(!enabled){await supabaseClient.auth.signOut();err.textContent='账号已禁用';showToast('账号已禁用');return false}_authCache={username:user,role:(user||'').trim().toUpperCase()==='DL24'?'admin':role,userId:data.user.id};document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';initApp();return false}catch(ex){console.error('[IRONLOG] 登录失败:',ex);clearLoginFails();const fails=getLoginFails()+1;setLoginFails(fails);let msg='账号或密码有误，请查验后输入';const em=(ex?.message||ex?.error_description||'').toString();if(em.includes('Invalid')||em.includes('invalid'))msg='账号或密码错误';else if(em)msg=em.substring(0,120);if(fails>=4){setLoginLock(60000);msg='1分钟后再试'}if(fails>=5){setLoginLock(300000);msg='尝试过于频繁，5分钟后再试'}err.textContent=msg;showToast(msg);return false}}
+let users;try{users=await getUsers()}catch(ex){err.textContent='加载失败，请刷新重试';showToast('加载失败，请刷新重试');return false}const hp=await hashPwd(pwd);const u=users.find(x=>x.username===user&&x.enabled);let fail=false;if(!u)fail=true;else if(u.passwordHash!==hp)fail=true;if(fail){const fails=getLoginFails()+1;setLoginFails(fails);let msg;if(fails<=3){msg='账号或密码有误，请查验后输入'}else if(fails===4){setLoginLock(60000);msg='1分钟后再试'}else{setLoginLock(300000);msg='尝试过于频繁，5分钟后再试'}err.textContent=msg;showToast(msg);return false}clearLoginFails();setAuth(user,u.role);document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';initApp();return false}
 
 function recordsKey(){const a=getAuth();return a?'forge_records_'+a.username:'forge_records'}
 function cardioRecordsKey(){const a=getAuth();return a?'forge_cardio_'+a.username:'forge_cardio'}
-function loadData(){try{const s=localStorage.getItem(recordsKey());if(s)state.records=JSON.parse(s)}catch(e){state.records=[]};try{const c=localStorage.getItem(cardioRecordsKey());if(c)state.cardioRecords=JSON.parse(c)}catch(e){state.cardioRecords=[]}}
-function saveData(){localStorage.setItem(recordsKey(),JSON.stringify(state.records));localStorage.setItem(cardioRecordsKey(),JSON.stringify(state.cardioRecords))}
+async function loadData(){if(USE_SUPABASE&&supabaseClient){try{const a=getAuth();if(!a||!a.userId){state.records=[];state.cardioRecords=[];return}const{data:recData}=await supabaseClient.from('records').select('*').eq('user_id',a.userId);const{data:cardData}=await supabaseClient.from('cardio_records').select('*').eq('user_id',a.userId);state.records=(recData||[]).map(r=>({id:r.id,date:r.date,bodyPart:r.body_part,exercise:r.exercise,sets:r.sets||[]}));state.cardioRecords=(cardData||[]).map(c=>({id:c.id,date:c.date,type:c.type,duration:c.duration,distance:c.distance,incline:c.incline,calories:c.calories}));return}catch(e){console.warn('Supabase load failed',e);state.records=[];state.cardioRecords=[];return}}try{const s=localStorage.getItem(recordsKey());if(s)state.records=JSON.parse(s)}catch(e){state.records=[]};try{const c=localStorage.getItem(cardioRecordsKey());if(c)state.cardioRecords=JSON.parse(c)}catch(e){state.cardioRecords=[]}}
+async function fetchServerData(){if(!USE_SUPABASE||!supabaseClient){return null}const a=getAuth();if(!a||!a.userId)return null;try{const{data:recData}=await supabaseClient.from('records').select('*').eq('user_id',a.userId);const{data:cardData}=await supabaseClient.from('cardio_records').select('*').eq('user_id',a.userId);return{records:(recData||[]).map(r=>({id:r.id,date:r.date,bodyPart:r.body_part,exercise:r.exercise,sets:r.sets||[]})),cardio:(cardData||[]).map(c=>({id:c.id,date:c.date,type:c.type,duration:c.duration,distance:c.distance,incline:c.incline,calories:c.calories}))}}catch(e){return null}}
+async function saveData(){if(USE_SUPABASE&&supabaseClient){try{const a=getAuth();if(!a||!a.userId)return;const server=await fetchServerData();let toSaveRecs=state.records,toSaveCardio=state.cardioRecords;if(server){const ourIds=new Set(state.records.map(r=>r.id)),ourCIds=new Set(state.cardioRecords.map(c=>c.id));toSaveRecs=[...state.records,...server.records.filter(r=>!ourIds.has(r.id))];toSaveCardio=[...state.cardioRecords,...server.cardio.filter(c=>!ourCIds.has(c.id))];state.records=toSaveRecs;state.cardioRecords=toSaveCardio}await supabaseClient.from('records').delete().eq('user_id',a.userId);await supabaseClient.from('cardio_records').delete().eq('user_id',a.userId);if(toSaveRecs.length){await supabaseClient.from('records').insert(toSaveRecs.map(r=>({id:r.id,user_id:a.userId,date:r.date,body_part:r.bodyPart,exercise:r.exercise,sets:r.sets})))}if(toSaveCardio.length){await supabaseClient.from('cardio_records').insert(toSaveCardio.map(c=>({id:c.id,user_id:a.userId,date:c.date,type:c.type,duration:c.duration,distance:c.distance,incline:c.incline,calories:c.calories})))}}catch(e){console.warn('Supabase save failed',e);showToast('同步失败')}return}localStorage.setItem(recordsKey(),JSON.stringify(state.records));localStorage.setItem(cardioRecordsKey(),JSON.stringify(state.cardioRecords))}
 function today(){return new Date().toISOString().split('T')[0]}
 function formatDate(d){const dt=new Date(d+'T00:00:00');const w=['日','一','二','三','四','五','六'];return`${dt.getMonth()+1}月${dt.getDate()}日 周${w[dt.getDay()]}`}
 function getBodyPart(id){return BODY_PARTS.find(b=>b.id===id)}
@@ -531,7 +586,7 @@ function saveCardioRecord(){const d=document.getElementById('recordDate').value,
 function deleteCardioRecord(id){state.cardioRecords=state.cardioRecords.filter(r=>r.id!==id);saveData();renderTodayLog();renderHistory();showToast('已删除')}
 function selectBodyPart(id){state.selectedBodyPart=id;state.selectedExercise='';document.getElementById('exerciseInput').value='';document.querySelectorAll('.bp-card').forEach(e=>e.classList.toggle('selected',e.dataset.bp===id));renderExerciseSuggestions();document.getElementById('exerciseSection').style.display='block';document.getElementById('setsSection').style.display='none';document.getElementById('saveSection').style.display='none'}
 function getExercisesForBodyPart(id){const d=DEFAULT_EXERCISES[id]||[];const h=[...new Set(state.records.filter(r=>r.bodyPart===id).map(r=>r.exercise))];return[...new Set([...d,...h])]}
-function renderExerciseSuggestions(){const exs=getExercisesForBodyPart(state.selectedBodyPart);document.getElementById('exerciseSuggestions').innerHTML=exs.map(e=>`<button class="exercise-chip ${state.selectedExercise===e?'selected':''}" onclick="selectExercise('${e}')">${e}</button>`).join('')}
+function renderExerciseSuggestions(){const exs=getExercisesForBodyPart(state.selectedBodyPart);document.getElementById('exerciseSuggestions').innerHTML=exs.map(e=>{const esc=e.replace(/\\/g,'\\\\').replace(/'/g,"\\'");return`<button class="exercise-chip ${state.selectedExercise===e?'selected':''}" onclick="selectExercise('${esc}')">${e}</button>`}).join('')}
 function selectExercise(n){state.selectedExercise=n;document.getElementById('exerciseInput').value=n;renderExerciseSuggestions();showSetsSection()}
 document.getElementById('exerciseInput').addEventListener('input',function(){state.selectedExercise=this.value;renderExerciseSuggestions();if(this.value.trim())showSetsSection();else{document.getElementById('setsSection').style.display='none';document.getElementById('saveSection').style.display='none'}});
 function showSetsSection(){document.getElementById('setsSection').style.display='block';document.getElementById('saveSection').style.display='block';const ls=getLastSetsForExercise(state.selectedExercise);if(ls&&state.sets.length===1&&!state.sets[0].weight&&!state.sets[0].reps)state.sets=ls.map(s=>({weight:s.weight,reps:s.reps}));renderSets()}
@@ -727,22 +782,29 @@ function toggleGuide(el){el.closest('.guide-card').classList.toggle('open')}
 function setGuideFilter(f){state.guideFilter=f;state.guideFilterMine=false;renderGuide()}
 function setGuideFilterMine(v){state.guideFilterMine=v;renderGuide()}
 
-async function addUser(){const a=getAuth();if(!a||a.role!=='admin'){showToast('无权限');return}const un=document.getElementById('newUserName').value.trim(),pw=document.getElementById('newUserPwd').value;const res=document.getElementById('addUserResult');if(!un||!pw){res.innerHTML='<span style="color:var(--danger)">请输入账号和密码</span>';return}const users=await getUsers();if(users.some(u=>u.username===un)){res.innerHTML='<span style="color:var(--danger)">账号已存在</span>';return}const nh=await hashPwd(pw);users.push({username:un,passwordHash:nh,role:'user',enabled:true});saveUsers(users);document.getElementById('newUserName').value='';document.getElementById('newUserPwd').value='';window._lastCreds={un,pw};res.innerHTML=`<span style="color:var(--success)">已创建账号，请复制保存：</span><br><code>账号: ${un} 密码: ${pw}</code> <button class="header-btn" style="display:inline-flex;margin-left:8px" onclick="copyLastCreds()">复制</button>`;renderUserList();showToast('用户已添加')}
-async function renderUserList(){const users=await getUsers();document.getElementById('userList').innerHTML=users.map(u=>`<div class="user-card"><div class="user-card-info"><div class="user-card-name">${u.username}</div><div class="user-card-role">${u.role==='admin'?'管理员':u.enabled?'普通用户':'已禁用'}</div></div><div class="user-card-actions">${u.role!=='admin'?`<div class="user-toggle ${u.enabled?'on':''}" onclick="toggleUser('${u.username}')" title="${u.enabled?'禁用':'启用'}"></div>`:''}</div></div>`).join('')}
+function validateUsername(un){if(!un)return '请输入账号';if(!/^[a-zA-Z]+$/.test(un))return '账号仅限字母，15位以内';if(un.length>15)return '账号不超过15位';return ''}
+function validatePassword(pw){if(!pw)return '请输入密码';if(!/^\d+$/.test(pw))return '密码仅限纯数字，4-6位';if(pw.length<4||pw.length>6)return '密码4-6位';return ''}
+async function addUser(){if(!isAdmin()){showToast('无权限');return}const un=document.getElementById('newUserName').value.trim(),pw=document.getElementById('newUserPwd').value;const res=document.getElementById('addUserResult');const uErr=validateUsername(un),pErr=validatePassword(pw);if(uErr||pErr){res.innerHTML='<span style="color:var(--danger)">'+(uErr||pErr)+'</span>';res.style.display='block';return}if(USE_SUPABASE&&supabaseClient){const existing=await getUsers();if(existing.some(u=>u.username===un)){res.innerHTML='<span style="color:var(--danger)">账号已存在，请使用其他账号名</span>';res.style.display='block';return}try{const{data,error}=await supabaseClient.auth.signUp({email:un+'@ironlog.local',password:pw,options:{data:{username:un,role:'user'}}});if(error)throw error;await supabaseClient.from('profiles').upsert({id:data.user.id,username:un,role:'user',enabled:true},{onConflict:'id'});document.getElementById('newUserName').value='';document.getElementById('newUserPwd').value='';window._lastCreds={un,pw};res.innerHTML=`<span style="color:var(--success)">✓ 创建完成</span><code>账号：${un}<br>密码：${pw}</code><button class="copy-btn" onclick="copyLastCreds()">复制</button>`;res.style.display='block';renderUserList();setTimeout(renderUserList,800);showToast('已创建，请复制保存')}catch(ex){const msg=(ex?.message||'').toString();const friendly=msg.includes('already registered')||msg.includes('already exists')?'账号已存在，请使用其他账号名':(msg||'创建失败');res.innerHTML='<span style="color:var(--danger)">'+friendly+'</span>';res.style.display='block';return}}const users=await getUsers();if(users.some(u=>u.username===un)){res.innerHTML='<span style="color:var(--danger)">账号已存在</span>';res.style.display='block';return}const nh=await hashPwd(pw);users.push({username:un,passwordHash:nh,role:'user',enabled:true});saveUsers(users);document.getElementById('newUserName').value='';document.getElementById('newUserPwd').value='';window._lastCreds={un,pw};res.innerHTML=`<span style="color:var(--success)">✓ 创建完成</span><code>账号：${un}<br>密码：${pw}</code><button class="copy-btn" onclick="copyLastCreds()">复制</button>`;res.style.display='block';renderUserList();showToast('已创建，请复制保存')}
+async function renderUserList(){const ul=document.getElementById('userList');if(!ul)return;const users=await getUsers();const managed=users.filter(u=>u.role!=='admin');if(managed.length===0){ul.innerHTML='<div class="user-list-empty">暂无已创建账号，创建后将显示于此</div>';return}ul.innerHTML=managed.map(u=>{const un=u.username.replace(/"/g,'&quot;');return`<div class="user-card" data-username="${un}"><div class="user-card-info"><div class="user-card-name">${u.username}</div><div class="user-card-role">${u.enabled?'普通用户':'已禁用'}</div></div><div class="user-card-actions"><div class="user-toggle-wrap" onclick="toggleUser(this.closest('.user-card').dataset.username)" title="${u.enabled?'关闭':'启用'}"><div class="user-toggle ${u.enabled?'on':''}"></div><span class="user-toggle-label">${u.enabled?'关闭':'启用'}</span></div><button class="user-delete-btn" onclick="openDeleteConfirm(this.closest('.user-card'))">删除</button></div></div>`}).join('')}
 function copyLastCreds(){if(window._lastCreds)navigator.clipboard.writeText('账号: '+window._lastCreds.un+' 密码: '+window._lastCreds.pw).then(()=>showToast('已复制')).catch(()=>showToast('复制失败'))}
-async function toggleUser(username){const users=await getUsers();const u=users.find(x=>x.username===username);if(!u||u.role==='admin')return;u.enabled=!u.enabled;saveUsers(users);renderUserList();showToast(u.enabled?'已启用':'已禁用')}
-async function changeAccount(){const cur=document.getElementById('accountCurPwd').value,newName=document.getElementById('accountNewName').value.trim(),newPwd=document.getElementById('accountNewPwd').value;const auth=getAuth();if(!auth)return;const users=await getUsers();const u=users.find(x=>x.username===auth.username);if(!u){showToast('用户不存在');return}const ch=await hashPwd(cur);if(u.passwordHash!==ch){showToast('当前密码错误');return}let changed=false;if(newName&&newName!==auth.username){if(users.some(x=>x.username===newName)){showToast('新账号名已存在');return}const mig=['forge_records_','forge_cardio_'];mig.forEach(pre=>{const oldKey=pre+auth.username,newKey=pre+newName,oldData=localStorage.getItem(oldKey);if(oldData){localStorage.setItem(newKey,oldData);localStorage.removeItem(oldKey)}});u.username=newName;auth.username=newName;setAuth(newName,auth.role);changed=true}if(newPwd){u.passwordHash=await hashPwd(newPwd);changed=true}if(changed){saveUsers(users);document.getElementById('accountCurPwd').value='';document.getElementById('accountNewName').value='';document.getElementById('accountNewPwd').value='';loadData();showToast('已保存，请妥善保管新密码');if(auth.role==='admin')document.getElementById('btnSettings').style.display='flex'}else{showToast('请至少填写一项修改')}}
+async function toggleUser(username){if(USE_SUPABASE&&supabaseClient){try{const{data:prof}=await supabaseClient.from('profiles').select('id,enabled').eq('username',username).is('deleted_at',null).single();if(!prof||(username||'').toUpperCase()==='DL24')return;await supabaseClient.from('profiles').update({enabled:!prof.enabled}).eq('username',username);renderUserList();showToast(prof.enabled?'已禁用':'已启用')}catch(e){showToast('操作失败')}return}const users=await getUsers();const u=users.find(x=>x.username===username);if(!u||u.role==='admin')return;u.enabled=!u.enabled;saveUsers(users);renderUserList();showToast(u.enabled?'已启用':'已禁用')}
+let _deleteTarget=null;
+function openDeleteConfirm(cardEl){if(!cardEl)return;_deleteTarget=cardEl.dataset.username;document.getElementById('deleteConfirmTitle').textContent='确认删除用户';document.getElementById('deleteConfirmMsg').textContent=`确定要删除用户「${_deleteTarget}」吗？此操作将注销该账号，不可恢复。`;document.getElementById('deleteConfirmModal').style.display='flex'}
+function closeDeleteConfirmModal(){_deleteTarget=null;document.getElementById('deleteConfirmModal').style.display='none'}
+async function confirmDeleteUser(){if(!_deleteTarget)return;const username=_deleteTarget;_deleteTarget=null;document.getElementById('deleteConfirmModal').style.display='none';if(USE_SUPABASE&&supabaseClient){try{await supabaseClient.from('profiles').update({deleted_at:new Date().toISOString(),enabled:false}).eq('username',username);renderUserList();showToast('已删除')}catch(e){showToast('操作失败')}}else{const users=await getUsers();const idx=users.findIndex(x=>x.username===username);if(idx>=0&&users[idx].role!=='admin'){users.splice(idx,1);localStorage.setItem('forge_users',JSON.stringify(users));renderUserList();showToast('已删除')}}}
+async function changeAccount(){const cur=document.getElementById('accountCurPwd').value,newName=document.getElementById('accountNewName').value.trim(),newPwd=document.getElementById('accountNewPwd').value;const auth=getAuth();if(!auth)return;if(!newName&&!newPwd){showToast('请至少填写一项修改');return}if(newName&&newName!==auth.username){const uErr=validateUsername(newName);if(uErr){showToast(uErr);return}}if(newPwd){const pErr=validatePassword(newPwd);if(pErr){showToast(pErr);return}}if(USE_SUPABASE&&supabaseClient){try{const{error:err}=await supabaseClient.auth.signInWithPassword({email:auth.username+'@ironlog.local',password:cur});if(err)throw new Error('当前密码错误');let changed=false;const updates={};if(newPwd){updates.password=newPwd;changed=true}if(newName&&newName!==auth.username){const users=await getUsers();if(users.some(x=>x.username===newName)){showToast('新账号名已存在');return}updates.email=newName+'@ironlog.local';updates.data={username:newName};await supabaseClient.from('profiles').update({username:newName}).eq('id',auth.userId);_authCache={...auth,username:newName};changed=true}if(changed){await supabaseClient.auth.updateUser(updates);document.getElementById('accountCurPwd').value='';document.getElementById('accountNewName').value='';document.getElementById('accountNewPwd').value='';showToast('已保存，请妥善保管新密码')}else showToast('请至少填写一项修改')}catch(ex){showToast(ex.message||'修改失败')}return}const users=await getUsers();const u=users.find(x=>x.username===auth.username);if(!u){showToast('用户不存在');return}const ch=await hashPwd(cur);if(u.passwordHash!==ch){showToast('当前密码错误');return}let changed=false;if(newName&&newName!==auth.username){if(users.some(x=>x.username===newName)){showToast('新账号名已存在');return}const mig=['forge_records_','forge_cardio_'];mig.forEach(pre=>{const oldKey=pre+auth.username,newKey=pre+newName,oldData=localStorage.getItem(oldKey);if(oldData){localStorage.setItem(newKey,oldData);localStorage.removeItem(oldKey)}});u.username=newName;auth.username=newName;setAuth(newName,auth.role);changed=true}if(newPwd){u.passwordHash=await hashPwd(newPwd);changed=true}if(changed){saveUsers(users);document.getElementById('accountCurPwd').value='';document.getElementById('accountNewName').value='';document.getElementById('accountNewPwd').value='';loadData();showToast('已保存，请妥善保管新密码');if(auth.role==='admin')document.getElementById('btnSettings').style.display='flex'}else{showToast('请至少填写一项修改')}}
 
-function maybeBack(){const active=document.querySelector('.view.active');if(active&&(active.id==='view-settings'||active.id==='view-account'))switchView('record')}
-function switchView(v){const a=getAuth();if((v==='settings')&&(!a||a.role!=='admin'))return;const nav=document.querySelector('.bottom-nav');nav.style.display=(v==='settings'||v==='account')?'none':'flex';document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===v));if(v==='history')renderHistory();if(v==='trends'){renderSummary();populateExerciseSelect();populateCardioTrendSelect();renderTrend();renderCardioTrend()}if(v==='record')renderTodayLog();if(v==='guide')renderGuide();if(v==='settings')renderUserList();document.querySelector('.main-content').scrollTop=0}
+function showSettingsSub(sub){['settingsMain','settingsCreate','settingsModify'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=id==='settingsMain'?(sub==='main'?'block':'none'):(id==='settingsCreate'?(sub==='create'?'block':'none'):(sub==='modify'?'block':'none'))});if(sub==='create')renderUserList()}
+function maybeBack(){const active=document.querySelector('.view.active');if(active&&active.id==='view-settings'){const sub=document.getElementById('settingsCreate');if(sub&&sub.style.display!=='none'){showSettingsSub('main');return}const mod=document.getElementById('settingsModify');if(mod&&mod.style.display!=='none'){showSettingsSub('main');return}switchView('record')}}
+function switchView(v){const nav=document.querySelector('.bottom-nav');nav.style.display=v==='settings'?'none':'flex';document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===v));if(v==='history')renderHistory();if(v==='trends'){renderSummary();populateExerciseSelect();populateCardioTrendSelect();renderTrend();renderCardioTrend()}if(v==='record')renderTodayLog();if(v==='guide')renderGuide();if(v==='settings'){showSettingsSub('main');if(isAdmin())document.getElementById('settingsEntryCreate').style.display='flex';else document.getElementById('settingsEntryCreate').style.display='none'}document.querySelector('.main-content').scrollTop=0}
 
 function exportData(){const data={records:state.records,cardioRecords:state.cardioRecords};const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`forge-backup-${today()}.json`;a.click();URL.revokeObjectURL(u);showToast('数据已导出')}
 function exportTemplate(){const h=[['日期','部位','动作','重量(kg)','次数']],s=[['2025-02-28','腿','哈克深蹲',150,10],['2025-02-28','腿','哈克深蹲',150,8],['2025-02-28','腿','深蹲',120,12],['2025-02-21','胸','卧推',80,10]];const ws=XLSX.utils.aoa_to_sheet([...h,...s]);ws['!cols']=[{wch:12},{wch:8},{wch:14},{wch:10},{wch:6}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'训练记录');XLSX.writeFile(wb,'forge-template.xlsx');showToast('模板已下载')}
 function triggerImport(){document.getElementById('importFile').click()}
 function importData(event){
   const file=event.target.files[0];if(!file)return;const ext=file.name.split('.').pop().toLowerCase();
-  if(ext==='json'){const r=new FileReader();r.onload=function(e){try{const imp=JSON.parse(e.target.result);let nr=0,nc=0;if(Array.isArray(imp)){const ids=new Set(state.records.map(r=>r.id));imp.forEach(x=>{if(!ids.has(x.id)){state.records.push(x);nr++;ids.add(x.id)}})}else if(imp&&typeof imp==='object'){if(Array.isArray(imp.records)){const ids=new Set(state.records.map(r=>r.id));imp.records.forEach(x=>{if(!ids.has(x.id)){state.records.push(x);nr++;ids.add(x.id)}})}if(Array.isArray(imp.cardioRecords)){const cids=new Set(state.cardioRecords.map(r=>r.id));imp.cardioRecords.forEach(x=>{if(!cids.has(x.id)){state.cardioRecords.push(x);nc++;cids.add(x.id)}})}}else{showToast('文件格式不正确');return}if(nr>0||nc>0){saveData();renderTodayLog();renderHistory();renderSummary();populateExerciseSelect();showToast(`已导入 ${nr} 条力量、${nc} 条有氧`)}else showToast('未发现新数据')}catch(err){showToast('导入失败')}};r.readAsText(file)}
-  else if(['xlsx','xls','csv'].includes(ext)){const r=new FileReader();r.onload=function(e){try{const d=new Uint8Array(e.target.result),wb=XLSX.read(d,{type:'array',cellDates:true}),sh=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(sh,{header:1,raw:false,dateNF:'yyyy-mm-dd'}),res=parseExcelRows(rows);if(res.error){showToast(res.error);return}const ids=new Set(state.records.map(r=>r.id));let n=0;res.records.forEach(r=>{if(!ids.has(r.id)){state.records.push(r);n++}});saveData();renderTodayLog();renderHistory();renderSummary();populateExerciseSelect();showToast(`已从 Excel 导入 ${n} 条记录`)}catch(err){console.error(err);showToast('Excel 解析失败')}};r.readAsArrayBuffer(file)}
+  if(ext==='json'){const r=new FileReader();r.onload=async function(e){try{const imp=JSON.parse(e.target.result);let nr=0,nc=0;if(Array.isArray(imp)){const ids=new Set(state.records.map(r=>r.id));imp.forEach(x=>{if(!ids.has(x.id)){state.records.push(x);nr++;ids.add(x.id)}})}else if(imp&&typeof imp==='object'){if(Array.isArray(imp.records)){const ids=new Set(state.records.map(r=>r.id));imp.records.forEach(x=>{if(!ids.has(x.id)){state.records.push(x);nr++;ids.add(x.id)}})}if(Array.isArray(imp.cardioRecords)){const cids=new Set(state.cardioRecords.map(r=>r.id));imp.cardioRecords.forEach(x=>{if(!cids.has(x.id)){state.cardioRecords.push(x);nc++;cids.add(x.id)}})}}else{showToast('文件格式不正确');return}if(nr>0||nc>0){await saveData();renderTodayLog();renderHistory();renderSummary();populateExerciseSelect();showToast(`已导入 ${nr} 条力量、${nc} 条有氧`)}else showToast('未发现新数据')}catch(err){showToast('导入失败')}};r.readAsText(file)}
+  else if(['xlsx','xls','csv'].includes(ext)){const r=new FileReader();r.onload=async function(e){try{const d=new Uint8Array(e.target.result),wb=XLSX.read(d,{type:'array',cellDates:true}),sh=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(sh,{header:1,raw:false,dateNF:'yyyy-mm-dd'}),res=parseExcelRows(rows);if(res.error){showToast(res.error);return}const ids=new Set(state.records.map(r=>r.id));let n=0;res.records.forEach(r=>{if(!ids.has(r.id)){state.records.push(r);n++}});await saveData();renderTodayLog();renderHistory();renderSummary();populateExerciseSelect();showToast(`已从 Excel 导入 ${n} 条记录`)}catch(err){console.error(err);showToast('Excel 解析失败')}};r.readAsArrayBuffer(file)}
   else showToast('不支持的文件格式');
   event.target.value='';
 }
@@ -753,8 +815,9 @@ function parseExcelDate(raw){if(raw==null||raw==='')return null;if(typeof raw===
 function detectColumns(hr){const m={date:-1,bodyPart:-1,exercise:-1,weight:-1,reps:-1};const dw=['日期','date','时间'],bw=['部位','肌群','body','muscle','part'],ew=['动作','项目','练习','exercise','名称','训练'],ww=['重量','weight','kg','负重'],rw=['次数','reps','次','rep'];hr.forEach((c,i)=>{const s=String(c||'').toLowerCase().trim();if(m.date===-1&&dw.some(w=>s.includes(w)))m.date=i;else if(m.bodyPart===-1&&bw.some(w=>s.includes(w)))m.bodyPart=i;else if(m.exercise===-1&&ew.some(w=>s.includes(w)))m.exercise=i;else if(m.weight===-1&&ww.some(w=>s.includes(w)))m.weight=i;else if(m.reps===-1&&rw.some(w=>s.includes(w)))m.reps=i});return m}
 function parseExcelRows(rows){if(rows.length<2)return{error:'文件为空'};let cm=detectColumns(rows[0]),ds=1;if(cm.date===-1||cm.exercise===-1||cm.weight===-1){cm=detectColumns(rows.length>1?rows[1]:[]);if(cm.date===-1||cm.exercise===-1||cm.weight===-1){cm={date:0,bodyPart:1,exercise:2,weight:3,reps:4};ds=1}else ds=2}const gp={};let ld=null,lb=null;for(let i=ds;i<rows.length;i++){const row=rows[i];if(!row||!row.length||row.every(c=>!c&&c!==0))continue;let dv=cm.date>=0?parseExcelDate(row[cm.date]):null;if(!dv&&ld)dv=ld;if(!dv)continue;ld=dv;let bv=cm.bodyPart>=0?resolveBodyPart(row[cm.bodyPart]):null;if(!bv&&lb)bv=lb;if(bv)lb=bv;const ex=cm.exercise>=0?String(row[cm.exercise]||'').trim():'';if(!ex)continue;if(!bv){for(const[bid,el]of Object.entries(DEFAULT_EXERCISES))if(el.includes(ex)){bv=bid;break}}if(!bv)bv='chest';const w=parseFloat(row[cm.weight])||0,rp=cm.reps>=0?(parseInt(row[cm.reps])||0):0;if(w<=0)continue;const k=`${dv}|${bv}|${ex}`;if(!gp[k])gp[k]={date:dv,bodyPart:bv,exercise:ex,sets:[]};gp[k].sets.push({weight:w,reps:rp||1})}const recs=Object.values(gp).map(g=>({id:generateId(),date:g.date,bodyPart:g.bodyPart,exercise:g.exercise,sets:g.sets}));if(!recs.length)return{error:'未识别到有效数据'};return{records:recs}}
 
-function initApp(){loadData();initRecordView();renderTodayLog();const a=getAuth();document.getElementById('btnSettings').style.display=a&&a.role==='admin'?'flex':'none'}
-(function onLoad(){const a=getAuth();if(a){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';initApp()}else{document.getElementById('app').style.display='none'}})();
+async function initApp(){await loadData();initRecordView();renderTodayLog();document.getElementById('btnSettings').style.display='flex'}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&document.getElementById('app').style.display!=='none'&&USE_SUPABASE&&supabaseClient&&getAuth()){loadData().then(()=>{renderTodayLog();renderHistory();renderSummary();populateExerciseSelect();if(document.getElementById('view-trends')?.classList.contains('active')){populateCardioTrendSelect();renderTrend();renderCardioTrend()}})}});
+(function onLoad(){if(USE_SUPABASE&&supabaseClient){(async()=>{try{const{data:{session}}=await supabaseClient.auth.getSession();if(session){const u=session.user;const{data:prof}=await supabaseClient.from('profiles').select('role,enabled,deleted_at').eq('id',u.id).single();if(prof&&(prof.deleted_at||!prof.enabled)){supabaseClient.auth.signOut();document.getElementById('app').style.display='none';return}const un=(u.user_metadata?.username||(u.email?u.email.split('@')[0]:'')||'').trim();_authCache={username:un,role:un.toUpperCase()==='DL24'?'admin':(prof?.role||'user'),userId:u.id};document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';await initApp();return}}catch(e){}document.getElementById('app').style.display='none'})();return}const a=getAuth();if(a){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';initApp()}else{document.getElementById('app').style.display='none'}})();
 </script>
 </body>
 </html>
