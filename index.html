@@ -14,19 +14,25 @@
     :root {
       --bg:#0A0A0C;--surface:#131318;--surface-2:#1B1B22;--surface-3:#24242E;--border:#2A2A36;
       --text:#EEEEF2;--text-2:#9999AA;--text-3:#5C5C6E;
-      --accent:#D49A1E;--accent-glow:#E8AD2A;--accent-dim:rgba(212,154,30,0.15);
+      --accent:#D49A1E;--accent-glow:#E8AD2A;--accent-strong:#C48A15;--accent-contrast:#0A0A0C;--accent-dim:rgba(212,154,30,0.15);
       --success:#22C55E;--success-dim:rgba(34,197,94,0.15);
       --danger:#EF4444;--danger-dim:rgba(239,68,68,0.15);
       --warning:#F59E0B;--info:#3B82F6;--info-dim:rgba(59,130,246,0.15);
       --chest:#FF6B6B;--shoulders:#4ECDC4;--back:#45B7D1;--legs:#F7C948;--arms:#BB8FCE;--core:#82E0AA;
+      --ambient-1:rgba(212,154,30,.06);--ambient-2:rgba(255,255,255,.015);--theme-badge:'FORGE';--theme-font:'Bebas Neue';
       --radius:12px;--radius-sm:8px;--radius-xs:6px;--nav-h:68px;--header-h:56px;
     }
+    body[data-theme="pocket"]{--bg:#061A2F;--surface:#0B2742;--surface-2:#0F3658;--surface-3:#15466E;--border:#1F5A86;--text:#F5FBFF;--text-2:#B7DDF7;--text-3:#6EA5CB;--accent:#2DB6FF;--accent-glow:#76D7FF;--accent-strong:#FF3B30;--accent-contrast:#FFFFFF;--accent-dim:rgba(45,182,255,.18);--success:#42E695;--success-dim:rgba(66,230,149,.16);--danger:#FF4D5E;--danger-dim:rgba(255,77,94,.16);--warning:#FFD166;--info:#2DB6FF;--info-dim:rgba(45,182,255,.18);--ambient-1:rgba(45,182,255,.18);--ambient-2:rgba(255,255,255,.035);--theme-badge:'POCKET POWER';--theme-font:'Noto Sans SC'}
+    body[data-theme="voyage"]{--bg:#120B08;--surface:#211410;--surface-2:#321E16;--surface-3:#49301F;--border:#6D4B2B;--text:#FFF4DF;--text-2:#D9B98B;--text-3:#8F6B45;--accent:#E43D30;--accent-glow:#FFB23E;--accent-strong:#C92C23;--accent-contrast:#FFF8E8;--accent-dim:rgba(228,61,48,.18);--success:#38D77A;--success-dim:rgba(56,215,122,.15);--danger:#FF4B4B;--danger-dim:rgba(255,75,75,.16);--warning:#FFB23E;--info:#1D9BF0;--info-dim:rgba(29,155,240,.18);--ambient-1:rgba(255,178,62,.13);--ambient-2:rgba(255,244,223,.025);--theme-badge:'VOYAGE LIFT';--theme-font:'Bebas Neue'}
+    body[data-theme="rift"]{--bg:#050D14;--surface:#0B1820;--surface-2:#102631;--surface-3:#173947;--border:#245464;--text:#EAFDF5;--text-2:#9CCBC0;--text-3:#5E817D;--accent:#C8A85A;--accent-glow:#7DFFCE;--accent-strong:#A8832A;--accent-contrast:#07100F;--accent-dim:rgba(125,255,206,.13);--success:#7DFFCE;--success-dim:rgba(125,255,206,.15);--danger:#FF5573;--danger-dim:rgba(255,85,115,.15);--warning:#F4C95D;--info:#5BA7FF;--info-dim:rgba(91,167,255,.14);--ambient-1:rgba(125,255,206,.11);--ambient-2:rgba(200,168,90,.025);--theme-badge:'RIFT TRAINING';--theme-font:'Bebas Neue'}
+    body[data-theme="cyber"]{--bg:#070711;--surface:#111123;--surface-2:#191936;--surface-3:#242454;--border:#39397A;--text:#F2F5FF;--text-2:#B8B9FF;--text-3:#7778B6;--accent:#FF3DF2;--accent-glow:#48F7FF;--accent-strong:#7C3DFF;--accent-contrast:#FFFFFF;--accent-dim:rgba(255,61,242,.16);--success:#48F7FF;--success-dim:rgba(72,247,255,.14);--danger:#FF4D7D;--danger-dim:rgba(255,77,125,.14);--warning:#FFE45E;--info:#48F7FF;--info-dim:rgba(72,247,255,.14);--ambient-1:rgba(255,61,242,.13);--ambient-2:rgba(72,247,255,.025);--theme-badge:'CYBER RUN';--theme-font:'Bebas Neue'}
+    body[data-theme="dojo"]{--bg:#11100D;--surface:#1B1913;--surface-2:#272318;--surface-3:#352E1D;--border:#54462B;--text:#FFF8EA;--text-2:#D8C8A8;--text-3:#8F8065;--accent:#F2D16B;--accent-glow:#FF7A59;--accent-strong:#B6402F;--accent-contrast:#140E08;--accent-dim:rgba(242,209,107,.16);--success:#9FE870;--success-dim:rgba(159,232,112,.14);--danger:#EF5350;--danger-dim:rgba(239,83,80,.14);--warning:#F2D16B;--info:#7BB9FF;--info-dim:rgba(123,185,255,.14);--ambient-1:rgba(242,209,107,.1);--ambient-2:rgba(255,248,234,.025);--theme-badge:'DOJO CORE';--theme-font:'Noto Sans SC'}
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{height:100%;font-family:'Noto Sans SC',-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;-webkit-font-smoothing:antialiased}
-    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 600px 400px at 50% 0%,rgba(212,154,30,.06) 0%,transparent 70%),repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(255,255,255,.015) 59px,rgba(255,255,255,.015) 60px),repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(255,255,255,.015) 59px,rgba(255,255,255,.015) 60px);pointer-events:none;z-index:0}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 600px 400px at 50% 0%,var(--ambient-1) 0%,transparent 70%),radial-gradient(circle at 15% 85%,var(--accent-dim),transparent 28%),repeating-linear-gradient(0deg,transparent,transparent 59px,var(--ambient-2) 59px,var(--ambient-2) 60px),repeating-linear-gradient(90deg,transparent,transparent 59px,var(--ambient-2) 59px,var(--ambient-2) 60px);pointer-events:none;z-index:0}
     #app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
     .app-header{height:var(--header-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0;border-bottom:1px solid var(--border);background:rgba(10,10,12,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
-    .app-logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--accent);text-shadow:0 0 30px rgba(212,154,30,.3)}
+    .app-logo{font-family:var(--theme-font),'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--accent);text-shadow:0 0 30px var(--accent-dim)}
     .app-logo span{color:var(--text-2);font-family:'Noto Sans SC',sans-serif;font-size:13px;font-weight:300;letter-spacing:1px;margin-left:8px}
     .header-actions{display:flex;gap:8px}
     .header-btn{width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
@@ -73,7 +79,7 @@
     .set-delete:hover{background:var(--danger-dim);color:var(--danger)}
     .add-set-btn{width:100%;height:42px;background:var(--surface);border:1.5px dashed var(--border);border-radius:var(--radius-sm);color:var(--text-3);font-size:13px;font-family:inherit;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
     .add-set-btn:hover{border-color:var(--accent);color:var(--accent)}
-    .save-btn{width:100%;height:50px;background:linear-gradient(135deg,var(--accent),#C48A15);border:none;border-radius:var(--radius);font-size:15px;font-weight:700;font-family:inherit;color:#0A0A0C;cursor:pointer;transition:all .25s;letter-spacing:1px;position:relative;overflow:hidden}
+    .save-btn{width:100%;height:50px;background:linear-gradient(135deg,var(--accent),var(--accent-strong));border:none;border-radius:var(--radius);font-size:15px;font-weight:700;font-family:inherit;color:var(--accent-contrast);cursor:pointer;transition:all .25s;letter-spacing:1px;position:relative;overflow:hidden}
     .save-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,.15));opacity:0;transition:opacity .25s}
     .save-btn:hover::before{opacity:1}.save-btn:active{transform:scale(.98)}.save-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
     .today-log{margin-top:30px;padding-top:24px;border-top:1px solid var(--border)}
@@ -259,6 +265,24 @@
     .settings-entry-card .entry-title{font-size:15px;font-weight:600;margin-bottom:4px}
     .settings-entry-card .entry-desc{font-size:12px;color:var(--text-3)}
     .settings-entry-card .entry-arrow{color:var(--text-3);font-size:16px}
+    .theme-panel{background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative;overflow:hidden}
+    .theme-panel::after{content:var(--theme-badge);position:absolute;right:12px;top:10px;font-family:'Space Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:1.5px;opacity:.55}
+    .theme-subtitle{font-size:12px;color:var(--text-3);line-height:1.6;margin:-4px 0 12px}
+    .theme-grid{display:flex;flex-direction:column;gap:8px}
+    .theme-card{min-height:58px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;background:var(--surface);cursor:pointer;position:relative;overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s;display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px}
+    .theme-card:hover{transform:translateX(2px);border-color:var(--accent)}
+    .theme-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-dim)}
+    .theme-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--c1),var(--c2));opacity:.16}
+    .theme-card::after{content:attr(data-mark);position:absolute;right:12px;top:8px;font-family:'Bebas Neue';font-size:18px;color:var(--c2);opacity:.16;letter-spacing:1px}
+    .theme-card-name{position:relative;font-size:14px;font-weight:700;margin-bottom:2px}
+    .theme-card-desc{position:relative;font-size:11px;color:var(--text-3);line-height:1.45}
+    .theme-swatches{position:relative;display:flex;gap:5px;justify-self:end}
+    .theme-swatch{width:16px;height:16px;border-radius:50%;border:1px solid rgba(255,255,255,.18)}
+    .action-list{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+    .action-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .25s}
+    .action-card:hover{border-color:var(--accent);background:var(--surface-2);transform:translateY(-1px)}
+    .action-icon{width:40px;height:40px;border-radius:var(--radius-sm);background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .action-info{flex:1}.action-title{font-size:14px;font-weight:700;margin-bottom:4px}.action-desc{font-size:12px;color:var(--text-3);line-height:1.5}
     @media(min-width:481px){#app{border-left:1px solid var(--border);border-right:1px solid var(--border)}}
   </style>
 </head>
@@ -279,10 +303,6 @@
   <header class="app-header">
     <div class="app-logo" id="headerLogo" onclick="maybeBack()" style="cursor:pointer">IRONLOG<span>艾若乐格</span></div>
     <div class="header-actions">
-      <button class="header-btn" id="btnSettings" onclick="switchView('settings')" title="设置">⚙️</button>
-      <button class="header-btn" onclick="exportTemplate()" title="下载Excel模板" style="font-size:13px">T</button>
-      <button class="header-btn" onclick="exportData()" title="导出数据">↓</button>
-      <button class="header-btn" onclick="triggerImport()" title="导入数据">↑</button>
       <input type="file" id="importFile" accept=".json,.xlsx,.xls,.csv" style="display:none" onchange="importData(event)">
     </div>
   </header>
@@ -335,6 +355,22 @@
       <div class="section-title">SETTINGS 设置</div>
       <div class="settings-entries" id="settingsEntries"></div>
     </div>
+    <div id="view-theme" class="view">
+      <div class="section-title">THEMES 皮肤主题</div>
+      <div class="theme-panel">
+        <div class="settings-section-title">选择训练皮肤</div>
+        <div class="theme-subtitle">6 款原创健身氛围主题，点击即刻切换并自动保存。</div>
+        <div class="theme-grid" id="themeGrid"></div>
+      </div>
+    </div>
+    <div id="view-data" class="view">
+      <div class="section-title">DATA 导入导出</div>
+      <div class="action-list">
+        <div class="action-card" onclick="exportTemplate()"><div class="action-icon">T</div><div class="action-info"><div class="action-title">下载 Excel 模板</div><div class="action-desc">用于批量整理训练记录，包含示例动作和字段。</div></div><span class="entry-arrow">›</span></div>
+        <div class="action-card" onclick="triggerImport()"><div class="action-icon">↑</div><div class="action-info"><div class="action-title">导入训练数据</div><div class="action-desc">支持 JSON、Excel、CSV，会自动合并新记录。</div></div><span class="entry-arrow">›</span></div>
+        <div class="action-card" onclick="exportData()"><div class="action-icon">↓</div><div class="action-info"><div class="action-title">导出备份数据</div><div class="action-desc">导出当前账号的力量与有氧记录，便于备份迁移。</div></div><span class="entry-arrow">›</span></div>
+      </div>
+    </div>
     <div id="view-settings-user" class="view">
       <div class="section-title">账号管理</div>
       <div class="add-user-form">
@@ -365,7 +401,7 @@
     <button class="nav-item active" data-view="record" onclick="switchView('record')"><span class="nav-icon">✏️</span><span class="nav-label">记录</span></button>
     <button class="nav-item" data-view="history" onclick="switchView('history')"><span class="nav-icon">📋</span><span class="nav-label">历史</span></button>
     <button class="nav-item" data-view="trends" onclick="switchView('trends')"><span class="nav-icon">📈</span><span class="nav-label">趋势</span></button>
-    <button class="nav-item" data-view="guide" onclick="switchView('guide')"><span class="nav-icon">📖</span><span class="nav-label">百科</span></button>
+    <button class="nav-item" data-view="settings" onclick="switchView('settings')"><span class="nav-icon">⚙️</span><span class="nav-label">设置</span></button>
   </nav>
 </div>
 <div class="toast" id="toast"></div>
@@ -520,6 +556,18 @@ const EXERCISE_GUIDE={
 };
 
 let state={records:[],cardioRecords:[],selectedBodyPart:null,selectedExercise:'',sets:[{weight:'',reps:''}],recordMode:'strength',cardioType:'incline',cardioDuration:'',cardioDistance:'',cardioIncline:'',historyFilter:'all',historyCardioFilter:'all',guideFilter:'all',guideFilterMine:false};
+const THEMES=[
+  {id:'iron',name:'黑金铁馆',desc:'原版硬核力量房，适合大重量训练记录。',mark:'IRON',colors:['#0A0A0C','#D49A1E','#22C55E']},
+  {id:'pocket',name:'蓝色口袋',desc:'蓝白红能量感，像有氧冲刺和弹跳训练。',mark:'JUMP',colors:['#061A2F','#2DB6FF','#FF3B30']},
+  {id:'voyage',name:'热血航海',desc:'木甲板、夕阳和远征感，适合力量突破。',mark:'LIFT',colors:['#120B08','#E43D30','#FFB23E']},
+  {id:'rift',name:'符文峡谷',desc:'深绿金色竞技感，像排位前的冲刺热身。',mark:'RIFT',colors:['#050D14','#7DFFCE','#C8A85A']},
+  {id:'cyber',name:'赛博跑道',desc:'霓虹速度感，适合有氧、HIIT 和冲刺日。',mark:'RUN',colors:['#070711','#FF3DF2','#48F7FF']},
+  {id:'dojo',name:'武道核心',desc:'沉稳金红武道感，适合核心和自重训练。',mark:'CORE',colors:['#11100D','#F2D16B','#FF7A59']}
+];
+function getTheme(){try{return localStorage.getItem('forge_theme')||'iron'}catch(e){return'iron'}}
+function applyTheme(id){const t=THEMES.some(x=>x.id===id)?id:'iron';document.body.dataset.theme=t==='iron'?'':t;try{localStorage.setItem('forge_theme',t)}catch(e){}renderThemePicker()}
+function renderThemePicker(){const grid=document.getElementById('themeGrid');if(!grid)return;const cur=getTheme();grid.innerHTML=THEMES.map(t=>`<div class="theme-card ${cur===t.id?'active':''}" data-mark="${t.mark}" style="--c1:${t.colors[1]};--c2:${t.colors[2]}" onclick="applyTheme('${t.id}')"><div><div class="theme-card-name">${t.name}</div><div class="theme-card-desc">${t.desc}</div></div><div class="theme-swatches">${t.colors.map(c=>`<span class="theme-swatch" style="background:${c}"></span>`).join('')}</div></div>`).join('')}
+function initTheme(){const t=getTheme();document.body.dataset.theme=t==='iron'?'':t}
 function matchExerciseToGuide(userEx,bpId){const exs=EXERCISE_GUIDE[bpId]||[];const u=String(userEx||'').trim();if(!u)return null;const exact=exs.find(e=>e.name===u);if(exact)return exact;const inc=exs.find(e=>e.name.includes(u)||u.includes(e.name));return inc||null}
 function getDifficultyStars(d){const s=['★☆☆','★★☆','★★★'];return s[Math.min(Math.max(0,d-1),2)]||'★☆☆'}
 
@@ -787,12 +835,12 @@ function copyLastCreds(){if(window._lastCreds)navigator.clipboard.writeText('账
 async function toggleUser(username){try{await runWithProgress('正在更新用户状态...',async()=>{await callManageUsers({action:'toggleUser',username});await renderUserList()});showToast('状态已更新')}catch(e){if(e.message!=='cancelled')showToast(e.message||'更新失败')}}
 async function deleteUser(username){const a=getAuth();if(!a||a.role!=='admin'){showToast('无权限');return}if(!username){showToast('用户不存在');return}if(!await askConfirm(`确认删除用户「${username}」？此操作不可撤销。`,'删除确认')){showToast('已取消删除');return}if(!await askConfirm(`请再次确认：立即永久删除「${username}」？`,'二次确认')){showToast('已取消删除');return}try{await runWithProgress(`正在删除用户「${username}」...`,async()=>{const u=(window._managedUsers||[]).find(x=>x.username===username);if(u)saveLastDeletedUser(u);await callManageUsers({action:'deleteUser',username});await renderUserList()});showToast('用户已删除')}catch(e){if(e.message!=='cancelled')showToast(e.message||'删除失败，请稍后重试')}}
 async function restoreLastDeletedUser(){const a=getAuth();if(!a||a.role!=='admin'){showToast('无权限');return}const users=await getUsers();const lu=getLastDeletedUser();if(lu&&lu.username){if(!await askConfirm(`确认恢复账号「${lu.username}」？`,'恢复确认')){showToast('已取消恢复');return}try{await runWithProgress(`正在恢复账号「${lu.username}」...`,async()=>{if(users.some(u=>u.username===lu.username))throw new Error('user-exists');users.push({username:lu.username,passwordHash:lu.passwordHash,role:lu.role||'user',enabled:lu.enabled!==false});await saveUsers(users);clearLastDeletedUser();await renderUserList()});showToast('账号已恢复')}catch(e){if(e&&e.message==='user-exists'){showToast('账号已存在，无需恢复');return}showToast('恢复失败，请稍后重试')}return}const cands=getLocalUserCandidates(users);if(cands.length===0){showToast('没有可恢复的本地账号');return}if(cands.length>1){showToast('检测到多个本地候选账号，请手动添加');return}const uname=cands[0],tempPwd='Temp@123456';if(!await askConfirm(`未找到最近删除记录，检测到本地账号候选「${uname}」。\n确认恢复并设置临时密码为 ${tempPwd}？`,'恢复确认')){showToast('已取消恢复');return}try{await runWithProgress(`正在恢复本地账号「${uname}」...`,async()=>{users.push({username:uname,passwordHash:await hashPwd(tempPwd),role:'user',enabled:true});await saveUsers(users);await renderUserList();const res=document.getElementById('addUserResult');if(res)res.innerHTML=`<span style="color:var(--warning)">已按本地数据恢复账号：</span><br><code>账号: ${uname} 密码: ${tempPwd}</code>`});showToast('本地账号已恢复')}catch(e){showToast('恢复失败，请稍后重试')}}
-async function changeAccount(){const cur=document.getElementById('accountCurPwd').value,newName=document.getElementById('accountNewName').value.trim(),newPwd=document.getElementById('accountNewPwd').value;const auth=getAuth();if(!auth)return;const users=await getUsers();const u=users.find(x=>x.username===auth.username);if(!u){showToast('用户不存在');return}const ch=await hashPwd(cur);if(u.passwordHash!==ch){showToast('当前密码错误');return}let changed=false;if(newName&&newName!==auth.username){if(users.some(x=>x.username===newName)){showToast('新账号名已存在');return}const mig=['forge_records_','forge_cardio_'];mig.forEach(pre=>{const oldKey=pre+auth.username,newKey=pre+newName,oldData=localStorage.getItem(oldKey);if(oldData){localStorage.setItem(newKey,oldData);localStorage.removeItem(oldKey)}});u.username=newName;auth.username=newName;setAuth(newName,auth.role);changed=true}if(newPwd){u.passwordHash=await hashPwd(newPwd);changed=true}if(changed){await saveUsers(users);document.getElementById('accountCurPwd').value='';document.getElementById('accountNewName').value='';document.getElementById('accountNewPwd').value='';loadData();showToast('已保存，请妥善保管新密码');if(auth.role==='admin')document.getElementById('btnSettings').style.display='flex'}else{showToast('请至少填写一项修改')}}
+async function changeAccount(){const cur=document.getElementById('accountCurPwd').value,newName=document.getElementById('accountNewName').value.trim(),newPwd=document.getElementById('accountNewPwd').value;const auth=getAuth();if(!auth)return;const users=await getUsers();const u=users.find(x=>x.username===auth.username);if(!u){showToast('用户不存在');return}const ch=await hashPwd(cur);if(u.passwordHash!==ch){showToast('当前密码错误');return}let changed=false;if(newName&&newName!==auth.username){if(users.some(x=>x.username===newName)){showToast('新账号名已存在');return}const mig=['forge_records_','forge_cardio_'];mig.forEach(pre=>{const oldKey=pre+auth.username,newKey=pre+newName,oldData=localStorage.getItem(oldKey);if(oldData){localStorage.setItem(newKey,oldData);localStorage.removeItem(oldKey)}});u.username=newName;auth.username=newName;setAuth(newName,auth.role);changed=true}if(newPwd){u.passwordHash=await hashPwd(newPwd);changed=true}if(changed){await saveUsers(users);document.getElementById('accountCurPwd').value='';document.getElementById('accountNewName').value='';document.getElementById('accountNewPwd').value='';loadData();showToast('已保存，请妥善保管新密码')}else{showToast('请至少填写一项修改')}}
 
-function maybeBack(){const active=document.querySelector('.view.active');if(active&&(active.id==='view-settings'||active.id==='view-settings-user'||active.id==='view-account')){if(active.id==='view-settings')switchView('record');else switchView('settings')}}
-function renderSettingsEntries(){const a=getAuth();const c=document.getElementById('settingsEntries');const cards=[];if(a&&a.role==='admin')cards.push({id:'settings-user',icon:'👥',title:'账号管理',desc:'添加、管理普通用户账号'});
-cards.push({id:'account',icon:'👤',title:'修改账号',desc:'修改账号名和密码'});c.innerHTML=cards.map(x=>`<div class="settings-entry-card" onclick="switchView('${x.id}')"><div class="entry-icon">${x.icon}</div><div class="entry-info"><div class="entry-title">${x.title}</div><div class="entry-desc">${x.desc}</div></div><span class="entry-arrow">›</span></div>`).join('')}
-async function switchView(v){const a=getAuth();let managedUsers=null;if(v==='settings-user'){if(!a||a.role!=='admin')return;managedUsers=await loadManagedUsersWithRetry();if(!managedUsers)return}const nav=document.querySelector('.bottom-nav');nav.style.display=(v==='settings'||v==='settings-user'||v==='account')?'none':'flex';document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===v));if(v==='history')renderHistory();if(v==='trends'){renderSummary();populateExerciseSelect();populateCardioTrendSelect();renderTrend();renderCardioTrend()}if(v==='record')renderTodayLog();if(v==='guide')renderGuide();if(v==='settings')renderSettingsEntries();if(v==='settings-user')renderManagedUsers(managedUsers);document.querySelector('.main-content').scrollTop=0}
+function maybeBack(){const active=document.querySelector('.view.active');if(active&&['view-settings','view-settings-user','view-account','view-theme','view-data','view-guide'].includes(active.id)){if(active.id==='view-settings')switchView('record');else switchView('settings')}}
+function renderSettingsEntries(){const a=getAuth();const c=document.getElementById('settingsEntries');const cards=[];if(a&&a.role==='admin')cards.push({id:'settings-user',icon:'👥',title:'账号管理',desc:'添加、删除、启停普通用户'});
+cards.push({id:'account',icon:'👤',title:'修改账号',desc:'修改当前账号名和密码'},{id:'theme',icon:'🎨',title:'皮肤主题',desc:'切换 6 款训练氛围皮肤'},{id:'data',icon:'⇅',title:'导入导出',desc:'模板下载、数据导入和备份导出'},{id:'guide',icon:'📖',title:'百科',desc:'查看训练动作指导和常见错误'});c.innerHTML=cards.map(x=>`<div class="settings-entry-card" onclick="switchView('${x.id}')"><div class="entry-icon">${x.icon}</div><div class="entry-info"><div class="entry-title">${x.title}</div><div class="entry-desc">${x.desc}</div></div><span class="entry-arrow">›</span></div>`).join('')}
+async function switchView(v){const a=getAuth();let managedUsers=null;if(v==='settings-user'){if(!a||a.role!=='admin')return;managedUsers=await loadManagedUsersWithRetry();if(!managedUsers)return}const nav=document.querySelector('.bottom-nav'),settingSubViews=['settings-user','account','theme','data','guide'];nav.style.display=settingSubViews.includes(v)?'none':'flex';document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===v));if(v==='history')renderHistory();if(v==='trends'){renderSummary();populateExerciseSelect();populateCardioTrendSelect();renderTrend();renderCardioTrend()}if(v==='record')renderTodayLog();if(v==='guide')renderGuide();if(v==='settings')renderSettingsEntries();if(v==='settings-user')renderManagedUsers(managedUsers);if(v==='theme')renderThemePicker();document.querySelector('.main-content').scrollTop=0}
 
 function exportData(){const data={records:state.records,cardioRecords:state.cardioRecords};const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`forge-backup-${today()}.json`;a.click();URL.revokeObjectURL(u);showToast('数据已导出')}
 function exportTemplate(){const h=[['日期','部位','动作','重量(kg)','次数']],s=[['2025-02-28','腿','哈克深蹲',150,10],['2025-02-28','腿','哈克深蹲',150,8],['2025-02-28','腿','深蹲',120,12],['2025-02-21','胸','卧推',80,10]];const ws=XLSX.utils.aoa_to_sheet([...h,...s]);ws['!cols']=[{wch:12},{wch:8},{wch:14},{wch:10},{wch:6}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'训练记录');XLSX.writeFile(wb,'forge-template.xlsx');showToast('模板已下载')}
@@ -811,8 +859,8 @@ function parseExcelDate(raw){if(raw==null||raw==='')return null;if(typeof raw===
 function detectColumns(hr){const m={date:-1,bodyPart:-1,exercise:-1,weight:-1,reps:-1};const dw=['日期','date','时间'],bw=['部位','肌群','body','muscle','part'],ew=['动作','项目','练习','exercise','名称','训练'],ww=['重量','weight','kg','负重'],rw=['次数','reps','次','rep'];hr.forEach((c,i)=>{const s=String(c||'').toLowerCase().trim();if(m.date===-1&&dw.some(w=>s.includes(w)))m.date=i;else if(m.bodyPart===-1&&bw.some(w=>s.includes(w)))m.bodyPart=i;else if(m.exercise===-1&&ew.some(w=>s.includes(w)))m.exercise=i;else if(m.weight===-1&&ww.some(w=>s.includes(w)))m.weight=i;else if(m.reps===-1&&rw.some(w=>s.includes(w)))m.reps=i});return m}
 function parseExcelRows(rows){if(rows.length<2)return{error:'文件为空'};let cm=detectColumns(rows[0]),ds=1;if(cm.date===-1||cm.exercise===-1||cm.weight===-1){cm=detectColumns(rows.length>1?rows[1]:[]);if(cm.date===-1||cm.exercise===-1||cm.weight===-1){cm={date:0,bodyPart:1,exercise:2,weight:3,reps:4};ds=1}else ds=2}const gp={};let ld=null,lb=null;for(let i=ds;i<rows.length;i++){const row=rows[i];if(!row||!row.length||row.every(c=>!c&&c!==0))continue;let dv=cm.date>=0?parseExcelDate(row[cm.date]):null;if(!dv&&ld)dv=ld;if(!dv)continue;ld=dv;let bv=cm.bodyPart>=0?resolveBodyPart(row[cm.bodyPart]):null;if(!bv&&lb)bv=lb;if(bv)lb=bv;const ex=cm.exercise>=0?String(row[cm.exercise]||'').trim():'';if(!ex)continue;if(!bv){for(const[bid,el]of Object.entries(DEFAULT_EXERCISES))if(el.includes(ex)){bv=bid;break}}if(!bv)bv='chest';const w=parseFloat(row[cm.weight])||0,rp=cm.reps>=0?(parseInt(row[cm.reps])||0):0;if(w<=0)continue;const k=`${dv}|${bv}|${ex}`;if(!gp[k])gp[k]={date:dv,bodyPart:bv,exercise:ex,sets:[]};gp[k].sets.push({weight:w,reps:rp||1})}const recs=Object.values(gp).map(g=>({id:generateId(),date:g.date,bodyPart:g.bodyPart,exercise:g.exercise,sets:g.sets}));if(!recs.length)return{error:'未识别到有效数据'};return{records:recs}}
 
-function initApp(){loadData();initRecordView();renderTodayLog();const a=getAuth();document.getElementById('btnSettings').style.display='flex';switchView('record')}
-(function onLoad(){const a=getAuth();if(a){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';initApp()}else{document.getElementById('app').style.display='none'}})();
+function initApp(){initTheme();loadData();initRecordView();renderTodayLog();switchView('record')}
+(function onLoad(){initTheme();const a=getAuth();if(a){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';initApp()}else{document.getElementById('app').style.display='none'}})();
 </script>
 </body>
 </html>
